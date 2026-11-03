@@ -4,12 +4,40 @@ using Microsoft.EntityFrameworkCore;
 using ErrandFlow.Application.Plans;
 using ErrandFlow.Infrastructure.Persistence.Repositories;
 using ErrandFlow.Application.Plans.UseCases;
+using ErrandFlow.Api.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var authority = builder.Configuration["Authentication:Jwt:Authority"]
+            ?? throw new InvalidOperationException(
+                "Authentication:Jwt:Authority is missing.");
+        var audience = builder.Configuration["Authentication:Jwt:Audience"]
+            ?? throw new InvalidOperationException(
+                "Authentication:Jwt:Audience is missing.");
+
+        options.Authority = authority;
+        options.Audience = audience;
+        options.RequireHttpsMetadata = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true
+        };
+    });
+builder.Services.AddAuthorization();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 var connectionString =
@@ -33,44 +61,6 @@ builder.Services.AddScoped<UpdatePlan>();
 builder.Services.AddScoped<DeletePlan>();
 
 var app = builder.Build();
-if (app.Environment.IsDevelopment())
-{
-    await using var scope = app.Services.CreateAsyncScope();
-
-    var dbContext = scope.ServiceProvider
-        .GetRequiredService<ErrandFlowDbContext>();
-
-    try
-    {
-        var plans = await dbContext.Plans
-            .AsNoTracking()
-            .OrderBy(plan => plan.PlanDate)
-            .Take(5)
-            .ToListAsync();
-
-        app.Logger.LogInformation(
-            "Plans query successful. Records fetched: {Count}",
-            plans.Count);
-    }
-    catch (Exception exception)
-    {
-        app.Logger.LogError(
-            exception,
-            "Plans query failed.");
-    }
-}
-{
-    await using var scope = app.Services.CreateAsyncScope();
-
-    var dbContext = scope.ServiceProvider
-        .GetRequiredService<ErrandFlowDbContext>();
-
-    var canConnect = await dbContext.Database.CanConnectAsync();
-
-    app.Logger.LogInformation(
-        "Database connection successful: {CanConnect}",
-        canConnect);
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -80,6 +70,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseExceptionHandler();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

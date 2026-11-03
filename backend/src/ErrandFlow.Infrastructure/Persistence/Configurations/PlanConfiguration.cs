@@ -63,19 +63,20 @@ public sealed class PlanConfiguration : IEntityTypeConfiguration<Plan>
             .HasColumnName("revision")
             .HasColumnType("bigint unsigned")
             .HasDefaultValue(1UL)
+            .IsConcurrencyToken()
             .IsRequired();
 
         builder.Property(plan => plan.CreatedAt)
             .HasColumnName("created_at")
             .HasColumnType("datetime(6)")
-            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
-            .ValueGeneratedOnAdd();
+            .ValueGeneratedNever()
+            .IsRequired();
 
         builder.Property(plan => plan.UpdatedAt)
             .HasColumnName("updated_at")
             .HasColumnType("datetime(6)")
-            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
-            .ValueGeneratedOnAddOrUpdate();
+            .ValueGeneratedNever()
+            .IsRequired();
 
         builder.HasIndex(plan => new
             {

@@ -66,12 +66,40 @@ public sealed class Plan
                 nameof(timeZone));
         }
 
+        if (planDate == default)
+        {
+            throw new ArgumentException(
+                "Plan date must be specified.",
+                nameof(planDate));
+        }
+
+        string normalizedTimeZone = timeZone.Trim();
+
+        try
+        {
+            _ = TimeZoneInfo.FindSystemTimeZoneById(normalizedTimeZone);
+        }
+        catch (TimeZoneNotFoundException exception)
+        {
+            throw new ArgumentException(
+                "Time zone does not exist.",
+                nameof(timeZone),
+                exception);
+        }
+        catch (InvalidTimeZoneException exception)
+        {
+            throw new ArgumentException(
+                "Time zone is invalid.",
+                nameof(timeZone),
+                exception);
+        }
+
         Id = Guid.NewGuid();
         OwnerId = ownerId;
         Name = normalizedName;
         PlanDate = planDate;
         DepartureTime = departureTime;
-        TimeZone = timeZone.Trim();
+        TimeZone = normalizedTimeZone;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
@@ -106,10 +134,38 @@ public sealed class Plan
                 nameof(timeZone));
         }
 
+        if (planDate == default)
+        {
+            throw new ArgumentException(
+                "Plan date must be specified.",
+                nameof(planDate));
+        }
+
+        string normalizedTimeZone = timeZone.Trim();
+
+        try
+        {
+            _ = TimeZoneInfo.FindSystemTimeZoneById(normalizedTimeZone);
+        }
+        catch (TimeZoneNotFoundException exception)
+        {
+            throw new ArgumentException(
+                "Time zone does not exist.",
+                nameof(timeZone),
+                exception);
+        }
+        catch (InvalidTimeZoneException exception)
+        {
+            throw new ArgumentException(
+                "Time zone is invalid.",
+                nameof(timeZone),
+                exception);
+        }
+
         Name = normalizedName;
         PlanDate = planDate;
         DepartureTime = departureTime;
-        TimeZone = timeZone.Trim();
+        TimeZone = normalizedTimeZone;
         Revision++;
         UpdatedAt = DateTime.UtcNow;
     }

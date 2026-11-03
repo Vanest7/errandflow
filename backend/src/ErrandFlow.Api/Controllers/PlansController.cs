@@ -86,7 +86,7 @@ public sealed class PlansController : ControllerBase
     [HttpPut("{planId:guid}")]
     public async Task<ActionResult<PlanDto>> UpdatePlanAsync(
         Guid planId,
-        PlanInput input,
+        UpdatePlanInput input,
         CancellationToken cancellationToken)
     {
         if (!TryGetOwnerId(out var ownerId))

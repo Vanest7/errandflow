@@ -1,4 +1,5 @@
 using ErrandFlow.Application.Plans.Dtos;
+using ErrandFlow.Application.Plans.Exceptions;
 
 namespace ErrandFlow.Application.Plans.UseCases;
 
@@ -14,7 +15,7 @@ public sealed class UpdatePlan
     public async Task<PlanDto?> ExecuteAsync(
         Guid ownerId,
         Guid planId,
-        PlanInput input,
+        UpdatePlanInput input,
         CancellationToken cancellationToken = default)
     {
         if (ownerId == Guid.Empty)
@@ -41,6 +42,13 @@ public sealed class UpdatePlan
         if (plan is null)
         {
             return null;
+        }
+
+        if (plan.Revision != input.ExpectedRevision)
+        {
+            throw new PlanConcurrencyException(
+                planId,
+                input.ExpectedRevision);
         }
 
         plan.UpdateDetails(
