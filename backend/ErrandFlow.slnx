@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ErrandFlow.Api/ErrandFlow.Api.csproj" />
+    <Project Path="src/ErrandFlow.Application/ErrandFlow.Application.csproj" />
+    <Project Path="src/ErrandFlow.Domain/ErrandFlow.Domain.csproj" />
+    <Project Path="src/ErrandFlow.Infrastructure/ErrandFlow.Infrastructure.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "dgSpecHash": "hMU5wfYEvPA=",
+  "success": true,
+  "projectFilePath": "/home/vanest/workSpace/errandflow/backend/src/ErrandFlow.Api/ErrandFlow.Api.csproj",
+  "expectedPackageFiles": [
+    "/home/vanest/.nuget/packages/microsoft.aspnetcore.openapi/10.0.14/microsoft.aspnetcore.openapi.10.0.14.nupkg.sha512",
+    "/home/vanest/.nuget/packages/microsoft.entityframeworkcore/9.0.0/microsoft.entityframeworkcore.9.0.0.nupkg.sha512",
+    "/home/vanest/.nuget/packages/microsoft.entityframeworkcore.abstractions/9.0.0/microsoft.entityframeworkcore.abstractions.9.0.0.nupkg.sha512",
+    "/home/vanest/.nuget/packages/microsoft.entityframeworkcore.analyzers/9.0.0/microsoft.entityframeworkcore.analyzers.9.0.0.nupkg.sha512",
+    "/home/vanest/.nuget/packages/microsoft.entityframeworkcore.relational/9.0.0/microsoft.entityframeworkcore.relational.9.0.0.nupkg.sha512",
+    "/home/vanest/.nuget/packages/microsoft.openapi/2.12.2/microsoft.openapi.2.12.2.nupkg.sha512",
+    "/home/vanest/.nuget/packages/mysqlconnector/2.6.2/mysqlconnector.2.6.2.nupkg.sha512",
+    "/home/vanest/.nuget/packages/pomelo.entityframeworkcore.mysql/9.0.0/pomelo.entityframeworkcore.mysql.9.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
