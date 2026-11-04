@@ -21,4 +21,8 @@ public interface IPlanRepository
     void Remove(Plan plan);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<Plan?> GetWithErrandsAsync(
+    Guid ownerId,
+    Guid planId,
+    CancellationToken cancellationToken = default);
 }

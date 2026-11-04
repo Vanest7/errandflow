@@ -44,7 +44,7 @@ public sealed class PlansController : ControllerBase
         return Ok(plans);
     }
 
-    [HttpGet("{planId:guid}")]
+    [HttpGet("{planId:guid}", Name = "GetPlanById")]
     public async Task<ActionResult<PlanDto>> GetPlanAsync(
         Guid planId,
         CancellationToken cancellationToken)
@@ -77,8 +77,8 @@ public sealed class PlansController : ControllerBase
             input,
             cancellationToken);
 
-        return CreatedAtAction(
-            nameof(GetPlanAsync),
+        return CreatedAtRoute(
+            "GetPlanById",
             new { planId = plan.Id },
             plan);
     }
@@ -106,6 +106,7 @@ public sealed class PlansController : ControllerBase
     [HttpDelete("{planId:guid}")]
     public async Task<IActionResult> DeletePlanAsync(
         Guid planId,
+        [FromQuery] ulong? expectedRevision,
         CancellationToken cancellationToken)
     {
         if (!TryGetOwnerId(out var ownerId))
@@ -116,6 +117,7 @@ public sealed class PlansController : ControllerBase
         var deleted = await _deletePlan.ExecuteAsync(
             ownerId,
             planId,
+            expectedRevision,
             cancellationToken);
 
         return deleted ? NoContent() : NotFound();

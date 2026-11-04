@@ -1,7 +1,13 @@
+using ErrandFlow.Domain.Errands;
+using ErrandFlow.Domain.Locations;
+
 namespace ErrandFlow.Domain.Plans;
 
 public sealed class Plan
 {
+    private readonly List<Errand> _errands = [];
+
+public IReadOnlyCollection<Errand> Errands => _errands.AsReadOnly();
     public Guid Id { get; private set; }
 
     public Guid OwnerId { get; private set; }
@@ -169,4 +175,128 @@ public sealed class Plan
         Revision++;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public Errand AddErrand(
+    Location location,
+    string title,
+    ushort durationMinutes)
+{
+    ArgumentNullException.ThrowIfNull(location);
+
+    if (location.PlanId != Id)
+    {
+        throw new ArgumentException(
+            "The location must belong to this plan.",
+            nameof(location));
+    }
+
+    var originalPosition = _errands.Count == 0
+        ? 0u
+        : checked(_errands.Max(errand => errand.OriginalPosition) + 1u);
+
+    var errand = new Errand(
+        Id,
+        location.Id,
+        title,
+        durationMinutes,
+        originalPosition);
+
+    var nextRevision = checked(Revision + 1UL);
+
+    _errands.Add(errand);
+    Revision = nextRevision;
+    UpdatedAt = DateTime.UtcNow;
+
+    return errand;
+}
+
+public Errand? UpdateErrand(
+    Guid errandId,
+    Location location,
+    string title,
+    ushort durationMinutes)
+{
+    if (errandId == Guid.Empty)
+    {
+        throw new ArgumentException(
+            "Errand ID cannot be empty.",
+            nameof(errandId));
+    }
+
+    var errand = _errands.SingleOrDefault(
+        item => item.Id == errandId);
+
+    if (errand is null)
+    {
+        return null;
+    }
+
+    var nextRevision = checked(Revision + 1UL);
+
+    errand.UpdateDetails(location, title, durationMinutes);
+
+    Revision = nextRevision;
+    UpdatedAt = DateTime.UtcNow;
+
+    return errand;
+}
+
+public bool RemoveErrand(Guid errandId)
+{
+    if (errandId == Guid.Empty)
+    {
+        throw new ArgumentException(
+            "Errand ID cannot be empty.",
+            nameof(errandId));
+    }
+
+    var errand = _errands.SingleOrDefault(
+        item => item.Id == errandId);
+
+    if (errand is null)
+    {
+        return false;
+    }
+
+    var nextRevision = checked(Revision + 1UL);
+
+    _errands.Remove(errand);
+    Revision = nextRevision;
+    UpdatedAt = DateTime.UtcNow;
+
+    return true;
+}
+public Errand? SetErrandSchedule(
+    Guid errandId,
+    DateTime? earliestStartAt,
+    DateTime? latestFinishAt,
+    DateTime? fixedStartAt)
+{
+    if (errandId == Guid.Empty)
+    {
+        throw new ArgumentException(
+            "Errand ID cannot be empty.",
+            nameof(errandId));
+    }
+
+    var errand = _errands.SingleOrDefault(
+        item => item.Id == errandId);
+
+    if (errand is null)
+    {
+        return null;
+    }
+
+    var nextRevision = checked(Revision + 1UL);
+
+    errand.SetSchedule(
+        earliestStartAt,
+        latestFinishAt,
+        fixedStartAt);
+
+    Revision = nextRevision;
+    UpdatedAt = DateTime.UtcNow;
+
+    return errand;
+}
 }

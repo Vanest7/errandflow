@@ -1,3 +1,5 @@
+using ErrandFlow.Application.Plans.Exceptions;
+
 namespace ErrandFlow.Application.Plans.UseCases;
 
 public sealed class DeletePlan
@@ -12,6 +14,7 @@ public sealed class DeletePlan
     public async Task<bool> ExecuteAsync(
         Guid ownerId,
         Guid planId,
+        ulong? expectedRevision,
         CancellationToken cancellationToken = default)
     {
         if (ownerId == Guid.Empty)
@@ -28,6 +31,13 @@ public sealed class DeletePlan
                 nameof(planId));
         }
 
+        if (!expectedRevision.HasValue || expectedRevision.Value == 0)
+        {
+            throw new ArgumentException(
+                "A positive expected revision is required.",
+                nameof(expectedRevision));
+        }
+
         var plan = await _planRepository.GetByIdAsync(
             ownerId,
             planId,
@@ -36,6 +46,11 @@ public sealed class DeletePlan
         if (plan is null)
         {
             return false;
+        }
+
+        if (plan.Revision != expectedRevision.Value)
+        {
+            throw new PlanConcurrencyException(planId, expectedRevision.Value);
         }
 
         _planRepository.Remove(plan);

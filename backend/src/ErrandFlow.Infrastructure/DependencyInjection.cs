@@ -1,4 +1,6 @@
 using ErrandFlow.Infrastructure.Persistence;
+using ErrandFlow.Application.Locations;
+using ErrandFlow.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
@@ -38,7 +40,8 @@ if (string.IsNullOrEmpty(connectionBuilder.Password))
             options.UseMySql(
                 connectionBuilder.ConnectionString,
                 new MariaDbServerVersion(new Version(11, 8, 6))));
-
+                
+    services.AddScoped<ILocationRepository, LocationRepository>();
         return services;
     }
 }

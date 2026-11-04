@@ -11,13 +11,22 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using ErrandFlow.Application.Users;
 using ErrandFlow.Application.Users.UseCases;
+using ErrandFlow.Application.Errands.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-builder.Services.AddProblemDetails();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = ApiProblemDetails.InvalidModelState;
+    });
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+        ApiProblemDetails.Enrich(context.ProblemDetails, context.HttpContext);
+});
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -76,6 +85,7 @@ builder.Services.AddScoped<GetPlan>();
 builder.Services.AddScoped<UpdatePlan>();
 builder.Services.AddScoped<DeletePlan>();
 builder.Services.AddScoped<RegisterCurrentUser>();
+builder.Services.AddScoped<CreateErrand>();
 
 builder.Services.AddCors(options =>
 {
@@ -106,6 +116,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
+app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,7 +1,6 @@
 using ErrandFlow.Application.Plans.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ErrandFlow.Api.Infrastructure;
 
@@ -23,38 +22,43 @@ public sealed class ApiExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        (int statusCode, string title) = exception switch
+        ProblemDetails problem;
+        if (exception is PlanConcurrencyException)
         {
-            ArgumentException => (StatusCodes.Status400BadRequest, "Invalid request."),
-            PlanConcurrencyException => (StatusCodes.Status409Conflict, "Plan was modified."),
-            DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "Plan was modified."),
-            _ => (0, string.Empty)
-        };
-
-        if (statusCode == 0)
+            problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "The plan was changed by another request."
+            };
+            problem.Extensions["code"] = "plan_revision_conflict";
+        }
+        else if (exception is ArgumentException argument)
+        {
+            var field = string.IsNullOrEmpty(argument.ParamName)
+                ? "request"
+                : argument.ParamName;
+            problem = new ValidationProblemDetails(new Dictionary<string, string[]>
+            {
+                [field] = ["The supplied value is invalid."]
+            })
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "One or more validation errors occurred."
+            };
+            problem.Extensions["code"] = "validation_failed";
+        }
+        else
         {
             return false;
         }
 
-        _logger.LogWarning(
-            exception,
-            "Request failed with status code {StatusCode}.",
-            statusCode);
-
-        httpContext.Response.StatusCode = statusCode;
-
-        await _problemDetailsService.WriteAsync(
-            new ProblemDetailsContext
-            {
-                HttpContext = httpContext,
-                Exception = exception,
-                ProblemDetails = new ProblemDetails
-                {
-                    Status = statusCode,
-                    Title = title
-                }
-            });
-
+        _logger.LogWarning("Request failed with code {ErrorCode}.", problem.Extensions["code"]);
+        httpContext.Response.StatusCode = problem.Status!.Value;
+        await _problemDetailsService.WriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = httpContext,
+            ProblemDetails = problem
+        });
         return true;
     }
 }

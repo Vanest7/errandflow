@@ -1,4 +1,5 @@
 using ErrandFlow.Domain.Plans;
+using ErrandFlow.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,6 +9,10 @@ public sealed class PlanConfiguration : IEntityTypeConfiguration<Plan>
 {
     public void Configure(EntityTypeBuilder<Plan> builder)
     {
+        builder.Navigation(plan => plan.Errands)
+            .HasField("_errands")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.ToTable("plans");
 
         builder.HasKey(plan => plan.Id);
@@ -77,6 +82,12 @@ public sealed class PlanConfiguration : IEntityTypeConfiguration<Plan>
             .HasColumnType("datetime(6)")
             .ValueGeneratedNever()
             .IsRequired();
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(plan => plan.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("fk_plans_owner");
 
         builder.HasIndex(plan => new
             {
