@@ -7,6 +7,8 @@ using ErrandFlow.Application.Plans.UseCases;
 using ErrandFlow.Api.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using ErrandFlow.Application.Users;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,8 +38,57 @@ builder.Services
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true
         };
+
+        options.MapInboundClaims = false;
+
+        options.Events = new JwtBearerEvents
+            {
+                OnTokenValidated = async context =>
+                    {
+                        if (context.Principal?.Identity is not ClaimsIdentity identity)
+                            {
+                                context.Fail("Invalid identity.");
+                                return;
+                            }
+
+                        foreach (var claim in identity.FindAll("errandflow_user_id").ToArray())
+                            {
+                                identity.RemoveClaim(claim);
+                            }
+
+                        var externalUserId = identity.FindFirst("sub")?.Value;
+
+                        if (string.IsNullOrWhiteSpace(externalUserId) ||
+                             externalUserId.Length > 255)
+                                {
+                                    context.Fail("Invalid subject.");
+                                    return;
+                                }
+
+                            var repository = context.HttpContext.RequestServices
+                            .GetRequiredService<IUserIdentityRepository>();
+
+                            var localUserId = await repository.FindLocalUserIdAsync(
+                            externalUserId,
+                            context.HttpContext.RequestAborted);
+
+                        if (localUserId.HasValue)
+                            {
+                                identity.AddClaim(new Claim(
+                                "errandflow_user_id",
+                                localUserId.Value.ToString("D")));
+                            }
+                    }
+            };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RegisteredUser", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("errandflow_user_id");
+    });
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 var connectionString =
@@ -54,6 +105,7 @@ builder.Services.AddInfrastructure(
     connectionString,
     databasePassword);
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+builder.Services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
 builder.Services.AddScoped<CreatePlan>();
 builder.Services.AddScoped<GetMyPlans>();
 builder.Services.AddScoped<GetPlan>();

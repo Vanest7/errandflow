@@ -8,7 +8,7 @@ namespace ErrandFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/plans")]
-[Authorize]
+[Authorize(Policy = "RegisteredUser")]
 public sealed class PlansController : ControllerBase
 {
     private readonly CreatePlan _createPlan;
@@ -122,10 +122,10 @@ public sealed class PlansController : ControllerBase
     }
 
     private bool TryGetOwnerId(out Guid ownerId)
-    {
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue("sub");
+{
+    var userIdClaim = User.FindFirstValue("errandflow_user_id");
 
-        return Guid.TryParse(userIdClaim, out ownerId);
-    }
+    return Guid.TryParse(userIdClaim, out ownerId)
+        && ownerId != Guid.Empty;
+}
 }
