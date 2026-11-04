@@ -1,30 +1,69 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using ErrandFlow.Application.Users;
+using ErrandFlow.Application.Users.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace ErrandFlow.Api.Controllers;
 
-    [ApiController]
-    [Route("api/auth")]
-    [Authorize]
-    public sealed class AuthController : ControllerBase
-    {
-        [HttpGet("me")]
-        public IActionResult GetCurrentUser()
-        {
-            var externalUserId = User.FindFirstValue("sub");
-            var localUserId = User.FindFirstValue("errandflow_user_id");
+public sealed record RegisterCurrentUserRequest(string? DisplayName);
 
-            return Ok(new
-            {
-                ExternalUserId = externalUserId,
-                LocalUserId = localUserId,
-                IsRegistered = localUserId is not null
-            });
-        }
+[ApiController]
+[Route("api/auth")]
+[Authorize]
+public sealed class AuthController : ControllerBase
+{
+    private readonly RegisterCurrentUser _registerCurrentUser;
+    private readonly IUserIdentityRepository _userIdentityRepository;
+
+    public AuthController(
+        RegisterCurrentUser registerCurrentUser,
+        IUserIdentityRepository userIdentityRepository)
+    {
+        _registerCurrentUser = registerCurrentUser;
+        _userIdentityRepository = userIdentityRepository;
     }
+
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUserAsync(
+        CancellationToken cancellationToken)
+    {
+        var externalUserId = User.FindFirstValue("sub");
+
+        if (string.IsNullOrWhiteSpace(externalUserId))
+        {
+            return Unauthorized();
+        }
+
+        var localUserId = await _userIdentityRepository.FindLocalUserIdAsync(
+            externalUserId,
+            cancellationToken);
+
+        return Ok(new
+        {
+            ExternalUserId = externalUserId,
+            LocalUserId = localUserId,
+            IsRegistered = localUserId.HasValue
+        });
+    }
+
+    [HttpPost("me")]
+    public async Task<ActionResult<CurrentUserDto>> RegisterAsync(
+        [FromBody] RegisterCurrentUserRequest request,
+        CancellationToken cancellationToken)
+    {
+        var externalUserId = User.FindFirstValue("sub");
+
+        if (string.IsNullOrWhiteSpace(externalUserId))
+        {
+            return Unauthorized();
+        }
+
+        var user = await _registerCurrentUser.ExecuteAsync(
+            externalUserId,
+            request.DisplayName,
+            cancellationToken);
+
+        return Ok(user);
+    }
+}

@@ -17,4 +17,26 @@ public sealed class User
     private User()
     {
     }
+     public User(string identityUserId, string displayName)
+    {
+        if (string.IsNullOrWhiteSpace(identityUserId) ||
+            identityUserId.Length > 255)
+        {
+            throw new ArgumentException(
+                "Invalid external identity.",
+                nameof(identityUserId));
+        }
+
+        if (string.IsNullOrWhiteSpace(displayName) ||
+            displayName.Trim().Length > 100)
+        {
+            throw new ArgumentException(
+                "Display name must contain between 1 and 100 characters.",
+                nameof(displayName));
+        }
+
+        Id = Guid.NewGuid();
+        IdentityUserId = identityUserId;
+        DisplayName = displayName.Trim();
+    }
 }

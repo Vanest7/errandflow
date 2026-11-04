@@ -1,0 +1,4 @@
+interface:
+  display_name: "Errandflow Sdd"
+  short_description: "Project-specific ErrandFlow development workflow"
+  default_prompt: "Use $errandflow-sdd for this ErrandFlow task."

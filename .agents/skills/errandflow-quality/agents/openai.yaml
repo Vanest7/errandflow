@@ -1,0 +1,4 @@
+interface:
+  display_name: "Errandflow Quality"
+  short_description: "Project-specific ErrandFlow development workflow"
+  default_prompt: "Use $errandflow-quality for this ErrandFlow task."
