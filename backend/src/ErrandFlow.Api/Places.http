@@ -22,3 +22,23 @@ Authorization: Bearer {{accessToken}}
 
 ### Require authentication (401)
 GET {{baseUrl}}/api/places/search?query=Valencia
+
+### Recognize an accented Spanish category (200)
+GET {{baseUrl}}/api/places/search?query=panader%C3%ADa&latitude=39.47&longitude=-0.376&radiusKilometers=3
+Authorization: Bearer {{accessToken}}
+
+### Recognize an English category (200)
+GET {{baseUrl}}/api/places/search?query=supermarket&latitude=39.47&longitude=-0.376
+Authorization: Bearer {{accessToken}}
+
+### Preserve establishment names as text (200, possibly empty)
+GET {{baseUrl}}/api/places/search?query=Panaderia%20La%20Espiga&latitude=39.47&longitude=-0.376
+Authorization: Bearer {{accessToken}}
+
+### Recognized category requires a center (400)
+GET {{baseUrl}}/api/places/search?query=panaderia
+Authorization: Bearer {{accessToken}}
+
+### Categories use a radius, not a bounding box (400)
+GET {{baseUrl}}/api/places/search?query=panaderia&latitude=39.47&longitude=-0.376&boundingBox=-0.44,39.42,-0.30,39.52
+Authorization: Bearer {{accessToken}}

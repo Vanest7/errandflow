@@ -2,17 +2,21 @@
 Status: implementing
 
 ## Goal and actors
-Registered users search addresses, named places and nearby pharmacies without a
+Registered users search addresses, named places and nearby establishments without a
 provider account, paid subscription or imported local geographic database.
 
 ## Requirements
 - FR-1: WHEN a registered user supplies a text query, the API SHALL return normalized place candidates.
-- FR-2: WHEN category=pharmacy and a valid center are supplied, the API SHALL search nearby pharmacies.
+- FR-2: WHEN a supported category and a valid center are supplied, the API SHALL search nearby establishments.
 - FR-3: IF input is invalid, the API SHALL return 400 with camelCase field errors before calling Photon.
 - FR-4: WHEN a search completes, persisted plans, locations and revisions SHALL remain unchanged.
 - FR-5: IF Photon is unavailable, busy, returns an error or malformed JSON, the API SHALL return a stable 503 code.
 - FR-6: WHEN search requests exceed the local user limit, the API SHALL return 429.
 - FR-7: WHEN a text search includes a bounding box, the search SHALL restrict results to that extent.
+
+- FR-8: WHEN query exactly matches a supported Spanish/English category alias, the API SHALL search that category; matching SHALL ignore case, accents and repeated whitespace.
+- FR-9: WHEN query does not match a category alias, the API SHALL preserve text search, including establishment names containing category words.
+- FR-10: IF an inferred category has no center or has a bounding box, the API SHALL reject it before calling the provider. Category search uses a center and radius.
 
 ## Non-functional requirements
 Use HTTPS and a replaceable provider port. Bound HTTP duration to 10 seconds and body size
@@ -21,14 +25,14 @@ apart; reject overlapping requests instead of accumulating an unbounded queue. D
 search terms, coordinates, upstream URLs or response bodies. Propagate cancellation.
 
 ## Boundary cases
-Exactly one of query/category is required. Query length: 3-200; limit: 1-10; pharmacy
+Exactly one of query/category is required. Query length: 3-200; limit: 1-10; category
 radius: (0,10] km. Coordinates must be paired and within geographic ranges. Empty
 results are 200 with []. Missing optional address fields are allowed. Bounding boxes
 use west,south,east,north; antimeridian-spanning boxes are not supported in this version.
 
 ## Out of scope
 Angular form/map implementation, map tiles, routing, geolocation permission, database
-migrations, provider accounts and additional categories. Keep existing atomic recado
+migrations, provider accounts and unrestricted natural-language category interpretation. Keep existing atomic recado
 creation: the client sends the selected result in newLocation.
 
 ## Open decisions

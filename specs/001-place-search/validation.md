@@ -20,3 +20,18 @@ project tests remain deferred. Real endpoint smoke evidence, if available, is no
 Live provider smoke: PASS. The actual C# adapter returned five normalized text results
 within a Valencia bounding box and five nearby pharmacy results from the public Photon
 server. This verifies those requests only, not service availability or all geographic coverage.
+
+## Unified category search extension (2026-11-05)
+- PASS FR-8/9/10: 61 isolated source-linked checks using temporary .NET SDK 10.0.403.
+  Coverage: accented/case/plural/whitespace ES/EN aliases, exact matching, named places,
+  unknown text fallback, legacy category, text bounding box, conflicting input, missing
+  center, invalid geography/radius, all 18 category mappings and escaped text requests.
+  Command: dotnet run --project /tmp/place-checks/PlaceChecks.csproj --no-restore.
+  This temporary harness is not a permanent repository test suite.
+- PASS: dotnet build backend/src/ErrandFlow.Api/ErrandFlow.Api.csproj -m:1 --nologo;
+  zero warnings and errors. PASS: git diff --check.
+- PASS live adapter smoke: query=panadería, query=supermarket and query=Mercadona each
+  returned five normalized candidates. An earlier attempt timed out; the repeat succeeded.
+  This verifies those requests at test time, not provider uptime or all category coverage.
+- NOT RUN: authenticated HTTP/model-binding/rate-limit checks with the user's deployment.
+  Updated Places.http contains manual examples. No database changes or migrations.

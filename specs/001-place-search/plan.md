@@ -21,3 +21,11 @@ record unrun API/error/cancellation checks explicitly.
 ## Dependencies and migration impact
 No added NuGet dependencies or database migrations. ASP.NET supplies HttpClient factory
 and rate-limiting support. Follow OSM attribution and Photon fair-use conditions.
+
+## Unified search extension
+FR-8/9: Application PlaceCategories resolves exact aliases; SearchPlaces normalizes the
+request before using its existing validation and provider port. Infrastructure
+PhotonCategoryTags maps canonical categories to OSM tags. No provider tags in Application.
+FR-10: keep center/radius category semantics and existing text-only bounding boxes.
+Verify accents/plurals/case/whitespace, names containing category words, unknown text,
+legacy category=pharmacy, conflicting modes, missing center and bounding-box rejection.

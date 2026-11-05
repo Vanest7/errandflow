@@ -44,3 +44,14 @@ Next: apply changes, run examples in Places.http, then connect Angular search an
 selection; preserve OSM attribution. Details: docs/place-search.md and active validation.md.
 Live Photon adapter smoke also passed: text-with-bounds and nearby pharmacies each
 returned five normalized results. This does not replace authenticated API verification.
+
+Unified place search extension: exact Spanish/English category aliases now select one of
+18 nearby establishment types. Matching ignores accents, case and repeated whitespace;
+other queries remain name/address searches. Categories require center/radius and reject
+boundingBox. Existing category=pharmacy remains supported. Application owns neutral
+aliases; Infrastructure owns OSM tags. No database writes or new packages.
+Verified: backend build with SDK 10.0.403 (0 warnings/errors), 61 isolated source-linked
+checks, git diff --check, and live bakery/supermarket/named-store adapter smoke (five
+results each after an earlier timeout). Authenticated API checks remain pending.
+Next: apply the incremental change and run the new examples in Places.http with a token;
+then connect Angular search/map selection. Provider coverage is not exhaustive.

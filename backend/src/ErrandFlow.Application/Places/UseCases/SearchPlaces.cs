@@ -32,9 +32,22 @@ public sealed class SearchPlaces
             throw new ArgumentException("Query must contain 3 to 200 characters.", "query");
         }
 
-        if (hasCategory && category != "pharmacy")
+        if (hasCategory)
         {
-            throw new ArgumentException("Unsupported place category.", "category");
+            category = PlaceCategories.Resolve(category!);
+            if (category is null)
+            {
+                throw new ArgumentException("Unsupported place category.", "category");
+            }
+        }
+        else
+        {
+            category = PlaceCategories.Resolve(query!);
+            if (category is not null)
+            {
+                query = null;
+                hasCategory = true;
+            }
         }
 
         if (input.Latitude.HasValue != input.Longitude.HasValue ||

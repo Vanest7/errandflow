@@ -29,10 +29,10 @@ public sealed class PhotonPlaceSearchProvider : IPlaceSearchProvider
             {
                 new("limit", input.Limit.ToString(CultureInfo.InvariantCulture))
             };
-            var nearby = input.Category == "pharmacy";
+            var nearby = input.Category is not null;
             if (nearby)
             {
-                parameters.Add(new("osm_tag", "amenity:pharmacy"));
+                parameters.Add(new("osm_tag", PhotonCategoryTags.GetTag(input.Category!)));
                 parameters.Add(new("radius", Format(input.RadiusKilometers)));
             }
             else
