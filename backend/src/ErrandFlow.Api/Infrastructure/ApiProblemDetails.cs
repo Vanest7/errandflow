@@ -17,6 +17,7 @@ internal static class ApiProblemDetails
                 404 => "resource_not_found",
                 405 => "method_not_allowed",
                 415 => "unsupported_media_type",
+                429 => "rate_limit_exceeded",
                 >= 500 => "internal_error",
                 _ => "request_failed"
             };

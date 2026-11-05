@@ -1,7 +1,7 @@
 # Project handoff
 Updated: 2026-11-05
 Phase: backend Plans, Locations and Errands contracts.
-Active spec: none; focused corrections documented in docs/backend-contracts.md.
+Active spec: specs/001-place-search/spec.md; prior corrections in docs/backend-contracts.md.
 
 Implemented: ownership-scoped Plans CRUD, JWT registration policy, named-route creation
 responses, revision-aware deletion, Infrastructure translation of EF concurrency errors,
@@ -31,3 +31,16 @@ NOT RUN for these corrections: build and .NET tests (SDK unavailable), HTTP exec
 MariaDB constraint execution and live schema comparison. Prior build results do not
 validate these changes. Next: build locally and verify missing-errand/stale-revision,
 field-error keys, and origin/destination integrity on a disposable database.
+
+Photon backend search added: GET /api/places/search, registered-user authorization,
+text/name search with optional center/bounding box and nearby pharmacy search, neutral
+DTOs, configurable HTTPS Photon adapter, timeouts, bounded response size, per-user rate
+limits and per-process outbound gate. Search does not persist locations or mutate plans.
+No API key, provider account, new NuGet package or database migration is required.
+Verified with temporary SDK 10.0.403: backend build (0 warnings/errors), 20 isolated
+source-linked checks and git diff --check. No permanent test project was added.
+NOT RUN: authenticated API/model-binding/rate-limit checks with the user's JWT/database.
+Next: apply changes, run examples in Places.http, then connect Angular search and map
+selection; preserve OSM attribution. Details: docs/place-search.md and active validation.md.
+Live Photon adapter smoke also passed: text-with-bounds and nearby pharmacies each
+returned five normalized results. This does not replace authenticated API verification.

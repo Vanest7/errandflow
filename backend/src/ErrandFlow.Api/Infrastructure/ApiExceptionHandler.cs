@@ -1,3 +1,4 @@
+using ErrandFlow.Application.Places.Exceptions;
 using ErrandFlow.Application.Plans.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,16 @@ public sealed class ApiExceptionHandler : IExceptionHandler
         CancellationToken cancellationToken)
     {
         ProblemDetails problem;
-        if (exception is PlanConcurrencyException)
+        if (exception is PlaceSearchUnavailableException)
+        {
+            problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status503ServiceUnavailable,
+                Title = "Place search is temporarily unavailable."
+            };
+            problem.Extensions["code"] = "place_search_unavailable";
+        }
+        else if (exception is PlanConcurrencyException)
         {
             problem = new ProblemDetails
             {

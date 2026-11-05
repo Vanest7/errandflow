@@ -1,0 +1,24 @@
+# Define baseUrl and accessToken in a local HTTP-client environment; do not commit tokens.
+
+### Search within the Valencia map area
+GET {{baseUrl}}/api/places/search?query=Col%C3%B3n&latitude=39.47&longitude=-0.376&boundingBox=-0.44,39.42,-0.30,39.52&limit=5
+Authorization: Bearer {{accessToken}}
+
+### Search nearby pharmacies
+GET {{baseUrl}}/api/places/search?category=pharmacy&latitude=39.47&longitude=-0.376&radiusKilometers=3&limit=5
+Authorization: Bearer {{accessToken}}
+
+### Reject conflicting search modes (400)
+GET {{baseUrl}}/api/places/search?query=pharmacy&category=pharmacy&latitude=39.47&longitude=-0.376
+Authorization: Bearer {{accessToken}}
+
+### Reject missing pharmacy center (400)
+GET {{baseUrl}}/api/places/search?category=pharmacy
+Authorization: Bearer {{accessToken}}
+
+### Reject invalid limit (400)
+GET {{baseUrl}}/api/places/search?query=Valencia&limit=100
+Authorization: Bearer {{accessToken}}
+
+### Require authentication (401)
+GET {{baseUrl}}/api/places/search?query=Valencia

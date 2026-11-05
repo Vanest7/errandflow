@@ -53,3 +53,10 @@ Verification for this correction: diff review, `git diff --check`, and a static 
 of baseline CHECK names/expressions against EF mappings passed. Build, automated .NET
 tests, HTTP requests and MariaDB execution were NOT RUN: the review environment has no
 .NET SDK or configured application/database services. Tests remain deferred as agreed.
+
+## Place search
+
+GET /api/places/search supports text query or category=pharmacy. See docs/place-search.md
+for parameter validation, bounding boxes and local limits. Search is read-only.
+Errors include rate_limit_exceeded (429) and place_search_unavailable (503); clients
+must distinguish provider failure from a successful empty result.

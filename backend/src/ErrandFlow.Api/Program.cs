@@ -1,3 +1,8 @@
+using System.Threading.RateLimiting;
+using ErrandFlow.Application.Places;
+using ErrandFlow.Application.Places.UseCases;
+using ErrandFlow.Infrastructure.Places;
+using Microsoft.AspNetCore.RateLimiting;
 using ErrandFlow.Infrastructure;
 using ErrandFlow.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -97,6 +102,37 @@ builder.Services.AddScoped<CreateLocation>();
 builder.Services.AddScoped<GetLocation>();
 builder.Services.AddScoped<GetPlanLocations>();
 
+builder.Services.AddScoped<SearchPlaces>();
+builder.Services.AddSingleton<PhotonRequestGate>();
+var photonBaseUrl = builder.Configuration["Photon:BaseUrl"] ?? "https://photon.komoot.io/";
+if (!Uri.TryCreate(photonBaseUrl, UriKind.Absolute, out var photonUri) ||
+    photonUri.Scheme != Uri.UriSchemeHttps || !string.IsNullOrEmpty(photonUri.Query) ||
+    !string.IsNullOrEmpty(photonUri.Fragment) || !string.IsNullOrEmpty(photonUri.UserInfo))
+{
+    throw new InvalidOperationException("Photon:BaseUrl must be an absolute HTTPS URL.");
+}
+builder.Services.AddHttpClient<IPlaceSearchProvider, PhotonPlaceSearchProvider>(client =>
+{
+    client.BaseAddress = new Uri(photonUri.AbsoluteUri.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.MaxResponseContentBufferSize = 1024 * 1024;
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("ErrandFlow/1.0");
+}).RemoveAllLoggers();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("PlaceSearch", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.User.FindFirst("errandflow_user_id")?.Value ?? "anonymous",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 30,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularDevelopment", policy =>
@@ -129,6 +165,7 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 
