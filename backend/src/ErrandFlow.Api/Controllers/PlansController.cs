@@ -16,19 +16,42 @@ public sealed class PlansController : ControllerBase
     private readonly GetPlan _getPlan;
     private readonly UpdatePlan _updatePlan;
     private readonly DeletePlan _deletePlan;
+    private readonly SetPlanLocations _setPlanLocations;
 
     public PlansController(
         CreatePlan createPlan,
         GetMyPlans getMyPlans,
         GetPlan getPlan,
         UpdatePlan updatePlan,
-        DeletePlan deletePlan)
+        DeletePlan deletePlan,
+        SetPlanLocations setPlanLocations)
     {
         _createPlan = createPlan;
         _getMyPlans = getMyPlans;
         _getPlan = getPlan;
         _updatePlan = updatePlan;
         _deletePlan = deletePlan;
+        _setPlanLocations = setPlanLocations;
+    }
+
+    [HttpPut("{planId:guid}/locations")]
+    public async Task<ActionResult<PlanDto>> SetLocationsAsync(
+        Guid planId,
+        SetPlanLocationsInput input,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetOwnerId(out var ownerId))
+        {
+            return Unauthorized();
+        }
+
+        var plan = await _setPlanLocations.ExecuteAsync(
+            ownerId,
+            planId,
+            input,
+            cancellationToken);
+
+        return plan is null ? NotFound() : Ok(plan);
     }
 
     [HttpGet]

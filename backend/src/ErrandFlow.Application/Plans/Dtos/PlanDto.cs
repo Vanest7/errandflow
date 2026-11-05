@@ -7,6 +7,8 @@ public sealed record PlanDto(
     DateOnly PlanDate,
     TimeOnly DepartureTime,
     string TimeZone,
+    Guid? OriginLocationId,
+    Guid? DestinationLocationId,
     ulong Revision,
     DateTime CreatedAt,
     DateTime UpdatedAt);

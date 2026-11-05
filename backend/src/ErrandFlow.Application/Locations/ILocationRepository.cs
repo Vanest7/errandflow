@@ -4,6 +4,11 @@ namespace ErrandFlow.Application.Locations;
 
 public interface ILocationRepository
 {
+    Task<IReadOnlyList<Location>> GetByPlanAsync(
+        Guid ownerId,
+        Guid planId,
+        CancellationToken cancellationToken = default);
+
     Task<Location?> GetByIdAsync(
         Guid ownerId,
         Guid planId,

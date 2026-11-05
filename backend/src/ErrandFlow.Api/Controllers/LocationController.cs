@@ -13,13 +13,34 @@ public sealed class LocationsController : ControllerBase
 {
     private readonly CreateLocation _createLocation;
     private readonly GetLocation _getLocation;
+    private readonly GetPlanLocations _getPlanLocations;
 
     public LocationsController(
         CreateLocation createLocation,
-        GetLocation getLocation)
+        GetLocation getLocation,
+        GetPlanLocations getPlanLocations)
     {
         _createLocation = createLocation;
         _getLocation = getLocation;
+        _getPlanLocations = getPlanLocations;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<LocationDto>>> GetPlanLocationsAsync(
+        Guid planId,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetOwnerId(out var ownerId))
+        {
+            return Unauthorized();
+        }
+
+        var locations = await _getPlanLocations.ExecuteAsync(
+            ownerId,
+            planId,
+            cancellationToken);
+
+        return locations is null ? NotFound() : Ok(locations);
     }
 
     [HttpGet("{locationId:guid}", Name = "GetLocationById")]

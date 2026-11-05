@@ -1,8 +1,9 @@
 # Database baseline
 
-The versioned SQL baseline targets MariaDB 11.8.6 and the currently implemented Users and
-Plans EF model. It does not reconstruct an uninspected development database or implement
-future Locations/Errands features. Origin/destination IDs remain nullable placeholders.
+The versioned SQL baseline targets MariaDB 11.8.6 and the currently implemented Users,
+Plans, Locations and Errands EF model. It does not reconstruct an uninspected development
+database. Origin/destination IDs remain nullable plan references validated by the application
+against the plan owner and its locations.
 
 ## New installation
 
@@ -16,10 +17,10 @@ The bootstrap session's UTC setting does not configure future application connec
 ## Existing installation
 
 Do NOT execute the bootstrap against an existing database. First back up the database and run
-`inspect_existing.sql` against it. Compare types, collations, defaults, indexes and foreign keys
-with the baseline and EF mappings. Include any existing Locations/Errands constraints in that
-review. An existing equivalent owner foreign key may have a different name and must not be
-added twice. Resolve orphan plans deliberately before adding a missing owner foreign key.
+`inspect_existing.sql` against it. Compare types, collations, defaults, indexes and foreign keys with the baseline and EF
+mappings. Include existing Locations/Errands constraints in that review. An existing
+equivalent owner foreign key may have a different name and must not be added twice. Resolve
+orphan plans deliberately before adding a missing owner foreign key.
 
 No existing-schema ALTER script is supplied without inspecting that schema. Record the reviewed
 incremental change as the next numbered script, validate it on a restored copy, then deploy it.

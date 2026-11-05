@@ -13,6 +13,8 @@ internal static class PlanMapper
             plan.PlanDate,
             plan.DepartureTime,
             plan.TimeZone,
+            plan.OriginLocationId,
+            plan.DestinationLocationId,
             plan.Revision,
             plan.CreatedAt,
             plan.UpdatedAt);

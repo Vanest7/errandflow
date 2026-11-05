@@ -31,6 +31,23 @@ public sealed class LocationRepository : ILocationRepository
             .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Location>> GetByPlanAsync(
+        Guid ownerId,
+        Guid planId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Locations
+            .AsNoTracking()
+            .Where(location =>
+                location.PlanId == planId &&
+                _dbContext.Plans.Any(plan =>
+                    plan.Id == location.PlanId &&
+                    plan.OwnerId == ownerId))
+            .OrderBy(location => location.Label)
+            .ThenBy(location => location.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(
     Location location,
     CancellationToken cancellationToken = default)

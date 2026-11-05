@@ -85,14 +85,17 @@ builder.Services.AddScoped<GetMyPlans>();
 builder.Services.AddScoped<GetPlan>();
 builder.Services.AddScoped<UpdatePlan>();
 builder.Services.AddScoped<DeletePlan>();
+builder.Services.AddScoped<SetPlanLocations>();
 builder.Services.AddScoped<RegisterCurrentUser>();
 builder.Services.AddScoped<CreateErrand>();
 builder.Services.AddScoped<GetErrand>();
 builder.Services.AddScoped<UpdateErrand>();
 builder.Services.AddScoped<DeleteErrand>();
 builder.Services.AddScoped<GetPlanErrands>();
+builder.Services.AddScoped<SetErrandSchedule>();
 builder.Services.AddScoped<CreateLocation>();
 builder.Services.AddScoped<GetLocation>();
+builder.Services.AddScoped<GetPlanLocations>();
 
 builder.Services.AddCors(options =>
 {

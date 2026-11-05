@@ -300,6 +300,19 @@ public Errand? SetErrandSchedule(
     return errand;
 }
 
+public void SetLocations(
+    Guid? originLocationId,
+    Guid? destinationLocationId)
+{
+    ValidateLocationId(originLocationId, nameof(originLocationId));
+    ValidateLocationId(destinationLocationId, nameof(destinationLocationId));
+
+    OriginLocationId = originLocationId;
+    DestinationLocationId = destinationLocationId;
+    Revision = checked(Revision + 1UL);
+    UpdatedAt = DateTime.UtcNow;
+}
+
 public Location CreateLocation(
     string label,
     string? address,
@@ -319,5 +332,15 @@ public Location CreateLocation(
     UpdatedAt = DateTime.UtcNow;
 
     return location;
+}
+
+private static void ValidateLocationId(Guid? locationId, string parameterName)
+{
+    if (locationId == Guid.Empty)
+    {
+        throw new ArgumentException(
+            "Location ID cannot be empty.",
+            parameterName);
+    }
 }
 }

@@ -1,10 +1,23 @@
 # Project handoff
-Updated: 2026-11-04
-Phase: backend Plans and Auth0 hardening.
-Active spec: none.
-Completed: Plans ownership-scoped query and CRUD use cases; JWT Bearer registration; centralized ProblemDetails errors; optimistic concurrency; UTC-owned audit timestamps; generated-file ignore rules.
-Verified: `dotnet build backend/ErrandFlow.slnx` passes with 0 warnings and 0 errors; `dotnet test backend/ErrandFlow.slnx --no-restore` passes; `git diff --check` passes; no generated `bin/` or `obj/` files remain tracked.
-Completed: Auth0 registration policy with the database lookup moved out of JWT validation.
-Pending: configure deployment-specific JWT Authority/Audience, automated application tests and database migration workflow.
-Next: add focused authentication/application tests and define the first migration before persistence rollout.
-Do not mark unrun tests or migrations as completed.
+Updated: 2026-11-05
+Phase: backend Plans, Locations and Errands contracts.
+Active spec: none; focused corrections documented in docs/backend-contracts.md.
+
+Implemented: ownership-scoped Plans CRUD, JWT registration policy, named-route creation
+responses, revision-aware deletion, Infrastructure translation of EF concurrency errors,
+stable ProblemDetails codes and field validation errors, explicit Plan-to-User foreign key.
+Added: versioned empty-database SQL baseline and read-only existing-schema inspection.
+Added: errand schedule mutation, plan origin/destination selection with ownership checks,
+owner-scoped plan location listing, and updated Plan DTO location fields.
+
+Verified in this correction pass: source/diff review, git diff --check and
+`dotnet build backend/src/ErrandFlow.Api/ErrandFlow.Api.csproj --no-restore` with zero
+warnings/errors. `dotnet test` completes successfully but no backend test projects exist,
+so this is not evidence of application test coverage.
+NOT RUN: HTTP execution, SQL execution and live schema comparison.
+
+Pending: compare the existing database with the baseline before any incremental migration;
+verify runtime behavior and add tests in the final testing phase. Deployment-specific JWT
+Authority/Audience and connection secrets remain external configuration.
+Next feature: add focused domain/application tests and validate the MariaDB schema against
+the target environment.

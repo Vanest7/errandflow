@@ -16,19 +16,44 @@ public sealed class ErrandsController : ControllerBase
     private readonly CreateErrand _createErrand;
     private readonly UpdateErrand _updateErrand;
     private readonly DeleteErrand _deleteErrand;
+    private readonly SetErrandSchedule _setErrandSchedule;
 
     public ErrandsController(
         GetPlanErrands getPlanErrands,
         GetErrand getErrand,
         CreateErrand createErrand,
         UpdateErrand updateErrand,
-        DeleteErrand deleteErrand)
+        DeleteErrand deleteErrand,
+        SetErrandSchedule setErrandSchedule)
     {
         _getPlanErrands = getPlanErrands;
         _getErrand = getErrand;
         _createErrand = createErrand;
         _updateErrand = updateErrand;
         _deleteErrand = deleteErrand;
+        _setErrandSchedule = setErrandSchedule;
+    }
+
+    [HttpPut("{errandId:guid}/schedule")]
+    public async Task<ActionResult<ErrandMutationResult>> SetScheduleAsync(
+        Guid planId,
+        Guid errandId,
+        SetErrandScheduleInput input,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetOwnerId(out var ownerId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _setErrandSchedule.ExecuteAsync(
+            ownerId,
+            planId,
+            errandId,
+            input,
+            cancellationToken);
+
+        return result is null ? NotFound() : Ok(result);
     }
 
     [HttpGet]
