@@ -10,7 +10,18 @@ public sealed class LocationConfiguration
 {
     public void Configure(EntityTypeBuilder<Location> builder)
     {
-        builder.ToTable("locations");
+        builder.ToTable("locations", table =>
+        {
+            table.HasCheckConstraint(
+                "ck_locations_label",
+                "CHAR_LENGTH(TRIM(label)) > 0");
+            table.HasCheckConstraint(
+                "ck_locations_latitude",
+                "latitude BETWEEN -90 AND 90");
+            table.HasCheckConstraint(
+                "ck_locations_longitude",
+                "longitude BETWEEN -180 AND 180");
+        });
 
         builder.HasKey(location => location.Id);
 

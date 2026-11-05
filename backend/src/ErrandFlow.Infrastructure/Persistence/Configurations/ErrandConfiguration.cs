@@ -14,7 +14,24 @@ public sealed class ErrandConfiguration
     {
         var utcConverter = new UtcDateTimeConverter();
 
-        builder.ToTable("errands");
+        builder.ToTable("errands", table =>
+        {
+            table.HasCheckConstraint(
+                "ck_errands_title",
+                "CHAR_LENGTH(TRIM(title)) > 0");
+            table.HasCheckConstraint(
+                "ck_errands_duration",
+                "duration_minutes > 0");
+            table.HasCheckConstraint(
+                "ck_errands_window",
+                "earliest_start_at IS NULL OR latest_finish_at IS NULL OR earliest_start_at < latest_finish_at");
+            table.HasCheckConstraint(
+                "ck_errands_fixed_start",
+                "fixed_start_at IS NULL OR earliest_start_at IS NULL OR fixed_start_at >= earliest_start_at");
+            table.HasCheckConstraint(
+                "ck_errands_fixed_finish",
+                "fixed_start_at IS NULL OR latest_finish_at IS NULL OR fixed_start_at + INTERVAL duration_minutes MINUTE <= latest_finish_at");
+        });
 
         builder.HasKey(errand => errand.Id);
 

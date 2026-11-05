@@ -29,7 +29,11 @@ CREATE TABLE plans (
     PRIMARY KEY (id),
     KEY ix_plans_owner_date (owner_id, plan_date),
     CONSTRAINT fk_plans_owner FOREIGN KEY (owner_id) REFERENCES users (id)
-        ON DELETE RESTRICT ON UPDATE RESTRICT
+        ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT ck_plans_name CHECK (CHAR_LENGTH(TRIM(name)) > 0),
+    CONSTRAINT ck_plans_zone CHECK (CHAR_LENGTH(TRIM(time_zone)) > 0),
+    CONSTRAINT ck_plans_departure CHECK (departure_time >= '00:00:00' AND departure_time < '24:00:00'),
+    CONSTRAINT ck_plans_revision CHECK (revision > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE locations (
@@ -42,7 +46,10 @@ CREATE TABLE locations (
     PRIMARY KEY (id),
     UNIQUE KEY uq_locations_plan_id (plan_id, id),
     CONSTRAINT fk_locations_plan FOREIGN KEY (plan_id) REFERENCES plans (id)
-        ON DELETE RESTRICT ON UPDATE RESTRICT
+        ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT ck_locations_label CHECK (CHAR_LENGTH(TRIM(label)) > 0),
+    CONSTRAINT ck_locations_latitude CHECK (latitude BETWEEN -90 AND 90),
+    CONSTRAINT ck_locations_longitude CHECK (longitude BETWEEN -180 AND 180)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE errands (
@@ -64,5 +71,21 @@ CREATE TABLE errands (
         ON DELETE RESTRICT ON UPDATE RESTRICT,
     CONSTRAINT fk_errands_location FOREIGN KEY (plan_id, location_id)
         REFERENCES locations (plan_id, id)
-        ON DELETE RESTRICT ON UPDATE RESTRICT
+        ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT ck_errands_title CHECK (CHAR_LENGTH(TRIM(title)) > 0),
+    CONSTRAINT ck_errands_duration CHECK (duration_minutes > 0),
+    CONSTRAINT ck_errands_window CHECK (earliest_start_at IS NULL OR latest_finish_at IS NULL OR earliest_start_at < latest_finish_at),
+    CONSTRAINT ck_errands_fixed_start CHECK (fixed_start_at IS NULL OR earliest_start_at IS NULL OR fixed_start_at >= earliest_start_at),
+    CONSTRAINT ck_errands_fixed_finish CHECK (fixed_start_at IS NULL OR latest_finish_at IS NULL OR fixed_start_at + INTERVAL duration_minutes MINUTE <= latest_finish_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Add the reverse references after both tables exist.
+ALTER TABLE plans
+    ADD KEY fk_plans_origin (id, origin_location_id),
+    ADD KEY fk_plans_destination (id, destination_location_id),
+    ADD CONSTRAINT fk_plans_origin
+        FOREIGN KEY (id, origin_location_id) REFERENCES locations (plan_id, id)
+        ON DELETE RESTRICT ON UPDATE RESTRICT,
+    ADD CONSTRAINT fk_plans_destination
+        FOREIGN KEY (id, destination_location_id) REFERENCES locations (plan_id, id)
+        ON DELETE RESTRICT ON UPDATE RESTRICT;

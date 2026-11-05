@@ -39,3 +39,17 @@ foreign key with restricted deletion. Database rollout follows backend/database/
 
 Tests are explicitly deferred by the user. Build, live HTTP and database verification remain
 pending where the corresponding runtime/services are unavailable.
+
+## Review corrections (2026-11-05)
+
+- Schedule updates check that the owner-scoped plan contains the errand before comparing
+  revisions, consistently returning 404 for a missing errand even with a stale revision.
+- Schedule and plan-location input errors use camelCase JSON field names.
+- The empty-database baseline and EF mappings preserve composite origin/destination
+  foreign keys and plan/location/errand CHECK constraints. Existing databases require
+  inspection; this correction does not execute a migration.
+
+Verification for this correction: diff review, `git diff --check`, and a static comparison
+of baseline CHECK names/expressions against EF mappings passed. Build, automated .NET
+tests, HTTP requests and MariaDB execution were NOT RUN: the review environment has no
+.NET SDK or configured application/database services. Tests remain deferred as agreed.

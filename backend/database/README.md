@@ -2,8 +2,11 @@
 
 The versioned SQL baseline targets MariaDB 11.8.6 and the currently implemented Users,
 Plans, Locations and Errands EF model. It does not reconstruct an uninspected development
-database. Origin/destination IDs remain nullable plan references validated by the application
-against the plan owner and its locations.
+database. Nullable origin/destination references are protected by composite foreign keys
+(id, location_id) -> locations (plan_id, id), as well as application ownership validation.
+The baseline and EF mappings include the plan, coordinate, duration and schedule CHECK
+constraints shown in the development schema. Reverse foreign keys are added after both
+tables exist; no change to an existing database is performed by updating these files.
 
 ## New installation
 

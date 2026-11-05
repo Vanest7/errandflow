@@ -43,13 +43,13 @@ public sealed class SetPlanLocations
         {
             throw new ArgumentException(
                 "Expected revision must be greater than zero.",
-                nameof(input.ExpectedRevision));
+                "expectedRevision");
         }
 
-        ValidateLocationId(input.OriginLocationId, nameof(input.OriginLocationId));
+        ValidateLocationId(input.OriginLocationId, "originLocationId");
         ValidateLocationId(
             input.DestinationLocationId,
-            nameof(input.DestinationLocationId));
+            "destinationLocationId");
 
         var plan = await _planRepository.GetByIdAsync(
             ownerId,
@@ -72,13 +72,13 @@ public sealed class SetPlanLocations
             ownerId,
             planId,
             input.OriginLocationId,
-            nameof(input.OriginLocationId),
+            "originLocationId",
             cancellationToken);
         await EnsureLocationBelongsToPlanAsync(
             ownerId,
             planId,
             input.DestinationLocationId,
-            nameof(input.DestinationLocationId),
+            "destinationLocationId",
             cancellationToken);
 
         plan.SetLocations(

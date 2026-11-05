@@ -47,7 +47,7 @@ public sealed class SetErrandSchedule
         {
             throw new ArgumentException(
                 "Expected revision must be greater than zero.",
-                nameof(input.ExpectedRevision));
+                "expectedRevision");
         }
 
         var plan = await _planRepository.GetWithErrandsAsync(
@@ -55,7 +55,8 @@ public sealed class SetErrandSchedule
             planId,
             cancellationToken);
 
-        if (plan is null)
+        if (plan is null ||
+            !plan.Errands.Any(errand => errand.Id == errandId))
         {
             return null;
         }
