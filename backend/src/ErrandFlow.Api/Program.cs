@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using ErrandFlow.Application.Users;
 using ErrandFlow.Application.Users.UseCases;
 using ErrandFlow.Application.Errands.UseCases;
+using ErrandFlow.Application.Locations.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,6 +87,12 @@ builder.Services.AddScoped<UpdatePlan>();
 builder.Services.AddScoped<DeletePlan>();
 builder.Services.AddScoped<RegisterCurrentUser>();
 builder.Services.AddScoped<CreateErrand>();
+builder.Services.AddScoped<GetErrand>();
+builder.Services.AddScoped<UpdateErrand>();
+builder.Services.AddScoped<DeleteErrand>();
+builder.Services.AddScoped<GetPlanErrands>();
+builder.Services.AddScoped<CreateLocation>();
+builder.Services.AddScoped<GetLocation>();
 
 builder.Services.AddCors(options =>
 {

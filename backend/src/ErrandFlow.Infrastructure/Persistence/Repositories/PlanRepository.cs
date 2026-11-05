@@ -167,4 +167,68 @@ private static bool IsErrandPositionConflict(
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant,
         TimeSpan.FromMilliseconds(100));
 }
+public async Task<bool> DeleteAsync(
+    Guid ownerId,
+    Guid planId,
+    ulong expectedRevision,
+    CancellationToken cancellationToken = default)
+{
+    await using var transaction =
+        await _dbContext.Database.BeginTransactionAsync(
+            cancellationToken);
+
+    var affectedRows = await _dbContext.Plans
+        .Where(plan =>
+            plan.Id == planId &&
+            plan.OwnerId == ownerId &&
+            plan.Revision == expectedRevision)
+        .ExecuteUpdateAsync(
+            setters => setters
+                .SetProperty(
+                    plan => plan.OriginLocationId,
+                    (Guid?)null)
+                .SetProperty(
+                    plan => plan.DestinationLocationId,
+                    (Guid?)null)
+                .SetProperty(
+                    plan => plan.Revision,
+                    plan => plan.Revision + 1UL),
+            cancellationToken);
+
+    if (affectedRows == 0)
+    {
+        var planExists = await _dbContext.Plans
+            .AnyAsync(
+                plan => plan.Id == planId &&
+                        plan.OwnerId == ownerId,
+                cancellationToken);
+
+        if (!planExists)
+        {
+            return false;
+        }
+
+        throw new PlanConcurrencyException(
+            planId,
+            expectedRevision);
+    }
+
+    await _dbContext.Errands
+        .Where(errand => errand.PlanId == planId)
+        .ExecuteDeleteAsync(cancellationToken);
+
+    await _dbContext.Locations
+        .Where(location => location.PlanId == planId)
+        .ExecuteDeleteAsync(cancellationToken);
+
+    await _dbContext.Plans
+        .Where(plan =>
+            plan.Id == planId &&
+            plan.OwnerId == ownerId)
+        .ExecuteDeleteAsync(cancellationToken);
+
+    await transaction.CommitAsync(cancellationToken);
+
+    return true;
+}
 }

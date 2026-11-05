@@ -30,4 +30,13 @@ public sealed class LocationRepository : ILocationRepository
                     plan.OwnerId == ownerId))
             .SingleOrDefaultAsync(cancellationToken);
     }
+
+    public async Task AddAsync(
+    Location location,
+    CancellationToken cancellationToken = default)
+{
+    await _dbContext.Locations.AddAsync(
+        location,
+        cancellationToken);
+}
 }

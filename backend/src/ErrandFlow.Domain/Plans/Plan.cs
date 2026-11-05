@@ -299,4 +299,25 @@ public Errand? SetErrandSchedule(
 
     return errand;
 }
+
+public Location CreateLocation(
+    string label,
+    string? address,
+    decimal latitude,
+    decimal longitude)
+{
+    var location = new Location(
+        Id,
+        label,
+        address,
+        latitude,
+        longitude);
+
+    var nextRevision = checked(Revision + 1UL);
+
+    Revision = nextRevision;
+    UpdatedAt = DateTime.UtcNow;
+
+    return location;
+}
 }

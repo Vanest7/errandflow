@@ -25,4 +25,10 @@ public interface IPlanRepository
     Guid ownerId,
     Guid planId,
     CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteAsync(
+    Guid ownerId,
+    Guid planId,
+    ulong expectedRevision,
+    CancellationToken cancellationToken = default);
 }

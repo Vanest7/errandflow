@@ -1,3 +1,4 @@
+using ErrandFlow.Application.Plans;
 using ErrandFlow.Application.Plans.Exceptions;
 
 namespace ErrandFlow.Application.Plans.UseCases;
@@ -38,24 +39,10 @@ public sealed class DeletePlan
                 nameof(expectedRevision));
         }
 
-        var plan = await _planRepository.GetByIdAsync(
+        return await _planRepository.DeleteAsync(
             ownerId,
             planId,
+            expectedRevision.Value,
             cancellationToken);
-
-        if (plan is null)
-        {
-            return false;
-        }
-
-        if (plan.Revision != expectedRevision.Value)
-        {
-            throw new PlanConcurrencyException(planId, expectedRevision.Value);
-        }
-
-        _planRepository.Remove(plan);
-        await _planRepository.SaveChangesAsync(cancellationToken);
-
-        return true;
     }
 }

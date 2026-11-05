@@ -2,6 +2,7 @@ using ErrandFlow.Application.Errands.Dtos;
 using ErrandFlow.Application.Locations;
 using ErrandFlow.Application.Plans;
 using ErrandFlow.Application.Plans.Exceptions;
+using ErrandFlow.Domain.Locations;
 
 namespace ErrandFlow.Application.Errands.UseCases;
 
@@ -40,18 +41,25 @@ public sealed class CreateErrand
                 nameof(planId));
         }
 
-        if (input.LocationId == Guid.Empty)
-        {
-            throw new ArgumentException(
-                "Location ID cannot be empty.",
-                "locationId");
-        }
-
         if (input.ExpectedRevision == 0)
         {
             throw new ArgumentException(
                 "Expected revision must be greater than zero.",
                 "expectedRevision");
+        }
+
+        if (input.LocationId.HasValue == (input.NewLocation is not null))
+        {
+            throw new ArgumentException(
+                "Provide either a location ID or a new location, but not both.",
+                nameof(input));
+        }
+
+        if (input.LocationId == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "Location ID cannot be empty.",
+                "locationId");
         }
 
         var plan = await _planRepository.GetWithErrandsAsync(
@@ -71,23 +79,46 @@ public sealed class CreateErrand
                 input.ExpectedRevision);
         }
 
-        var location = await _locationRepository.GetByIdAsync(
-            ownerId,
-            planId,
-            input.LocationId,
-            cancellationToken);
+        Location location;
 
-        if (location is null)
+        if (input.NewLocation is { } newLocation)
         {
-            throw new ArgumentException(
-                "The location is not available in this plan.",
-                "locationId");
+            location = new Location(
+                plan.Id,
+                newLocation.Label,
+                newLocation.Address,
+                newLocation.Latitude,
+                newLocation.Longitude);
+        }
+        else
+        {
+            var existingLocation = await _locationRepository.GetByIdAsync(
+                ownerId,
+                planId,
+                input.LocationId!.Value,
+                cancellationToken);
+
+            if (existingLocation is null)
+            {
+                throw new ArgumentException(
+                    "The location is not available in this plan.",
+                    "locationId");
+            }
+
+            location = existingLocation;
         }
 
         var errand = plan.AddErrand(
             location,
             input.Title,
             input.DurationMinutes);
+
+        if (input.NewLocation is not null)
+        {
+            await _locationRepository.AddAsync(
+                location,
+                cancellationToken);
+        }
 
         await _planRepository.SaveChangesAsync(cancellationToken);
 
