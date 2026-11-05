@@ -1,4 +1,5 @@
 using ErrandFlow.Application.Places.Exceptions;
+using ErrandFlow.Application.Planning.Exceptions;
 using ErrandFlow.Application.Plans.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +33,16 @@ public sealed class ApiExceptionHandler : IExceptionHandler
                 Title = "Place search is temporarily unavailable."
             };
             problem.Extensions["code"] = "place_search_unavailable";
+        }
+        else if (exception is TravelGraphUnavailableException)
+        {
+            problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status503ServiceUnavailable,
+                Title = "Travel graph is temporarily unavailable."
+            };
+
+            problem.Extensions["code"] = "travel_graph_unavailable";
         }
         else if (exception is PlanConcurrencyException)
         {

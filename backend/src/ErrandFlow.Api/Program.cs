@@ -18,6 +18,9 @@ using ErrandFlow.Application.Users;
 using ErrandFlow.Application.Users.UseCases;
 using ErrandFlow.Application.Errands.UseCases;
 using ErrandFlow.Application.Locations.UseCases;
+using ErrandFlow.Application.Planning.UseCases;
+using ErrandFlow.Application.Planning;
+using ErrandFlow.Infrastructure.Routing.Valhalla;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -143,6 +146,55 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+var valhallaBaseUrl =
+    builder.Configuration["Routing:Valhalla:BaseUrl"];
+
+if (!Uri.TryCreate(
+        valhallaBaseUrl,
+        UriKind.Absolute,
+        out var valhallaUri) ||
+    valhallaUri.Scheme != Uri.UriSchemeHttps ||
+    !string.IsNullOrEmpty(valhallaUri.UserInfo) ||
+    !string.IsNullOrEmpty(valhallaUri.Query) ||
+    !string.IsNullOrEmpty(valhallaUri.Fragment))
+{
+    throw new InvalidOperationException(
+        "Routing:Valhalla:BaseUrl must be an HTTPS URL without credentials, query or fragment.");
+}
+
+var valhallaClientId =
+    builder.Configuration["Routing:Valhalla:ClientId"];
+
+if (string.IsNullOrWhiteSpace(valhallaClientId))
+{
+    throw new InvalidOperationException(
+        "Routing:Valhalla:ClientId is required.");
+}
+
+var valhallaBaseAddress = new Uri(
+    valhallaUri.AbsoluteUri.TrimEnd('/') + "/");
+
+builder.Services.AddSingleton<ValhallaRequestGate>();
+
+builder.Services
+    .AddHttpClient<ITravelGraphProvider, ValhallaTravelGraphProvider>(
+        client =>
+        {
+            client.BaseAddress = valhallaBaseAddress;
+            client.Timeout = TimeSpan.FromSeconds(10);
+            client.MaxResponseContentBufferSize = 1024 * 1024;
+
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(
+                "ErrandFlow/1.0");
+
+            client.DefaultRequestHeaders.Add(
+                "X-Client-Id",
+                valhallaClientId);
+        })
+    .RemoveAllLoggers();
+
+builder.Services.AddScoped<BuildPlanGraph>();
 
 var app = builder.Build();
 

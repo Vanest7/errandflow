@@ -36,12 +36,12 @@ public sealed class BuildPlanGraph
                 nameof(planId));
         }
 
-        if (!Enum.IsDefined(travelMode))
-        {
-            throw new ArgumentException(
-                "Unsupported travel mode.",
-                nameof(travelMode));
-        }
+        if (travelMode != TravelMode.Walking)
+            {
+                throw new ArgumentException(
+                    "Only walking routes are currently supported.",
+                    nameof(travelMode));
+            }
 
         var snapshot = await _repository.GetSnapshotAsync(
             ownerId,
