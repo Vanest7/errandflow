@@ -2,7 +2,6 @@ using System.Security.Claims;
 using ErrandFlow.Application.Planning;
 using ErrandFlow.Application.Planning.Dtos;
 using ErrandFlow.Application.Planning.UseCases;
-using ErrandFlow.Domain.Planning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +13,14 @@ namespace ErrandFlow.Api.Controllers;
 public sealed class PlanningController : ControllerBase
 {
     private readonly BuildPlanGraph _buildPlanGraph;
+    private readonly EvaluateOriginalPlan _evaluateOriginalPlan;
 
-    public PlanningController(BuildPlanGraph buildPlanGraph)
+    public PlanningController(
+        BuildPlanGraph buildPlanGraph,
+        EvaluateOriginalPlan evaluateOriginalPlan)
     {
         _buildPlanGraph = buildPlanGraph;
+        _evaluateOriginalPlan = evaluateOriginalPlan;
     }
 
     [HttpGet("graph")]
@@ -46,6 +49,34 @@ public sealed class PlanningController : ControllerBase
         }
 
         return Ok(PlanGraphMapper.ToDto(result));
+    }
+
+    [HttpGet("original")]
+    [ResponseCache(
+        NoStore = true,
+        Location = ResponseCacheLocation.None)]
+    public async Task<ActionResult<PlanScheduleDto>> GetOriginalScheduleAsync(
+        Guid planId,
+        CancellationToken cancellationToken,
+        [FromQuery] TravelMode travelMode = TravelMode.Walking)
+    {
+        if (!TryGetOwnerId(out var ownerId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _evaluateOriginalPlan.ExecuteAsync(
+            ownerId,
+            planId,
+            travelMode,
+            cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(PlanScheduleMapper.ToDto(result));
     }
 
     private bool TryGetOwnerId(out Guid ownerId)

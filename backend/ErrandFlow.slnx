@@ -5,4 +5,7 @@
     <Project Path="src/ErrandFlow.Domain/ErrandFlow.Domain.csproj" />
     <Project Path="src/ErrandFlow.Infrastructure/ErrandFlow.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ErrandFlow.Domain.Tests/ErrandFlow.Domain.Tests.csproj" />
+  </Folder>
 </Solution>

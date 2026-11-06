@@ -1,4 +1,4 @@
-namespace ErrandFlow.Domain.Planning;
+namespace ErrandFlow.Application.Planning;
 
 public enum TravelMode
 {

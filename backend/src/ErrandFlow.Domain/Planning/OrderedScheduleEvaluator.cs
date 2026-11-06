@@ -2,13 +2,13 @@ using ErrandFlow.Domain.Errands;
 
 namespace ErrandFlow.Domain.Planning;
 
-public static class OriginalOrderEvaluator
+public static class OrderedScheduleEvaluator
 {
     public static ScheduleEvaluation Evaluate(
         Guid? originLocationId,
         Guid? destinationLocationId,
         DateTime departureAtUtc,
-        IReadOnlyCollection<Errand> errands,
+        IReadOnlyList<Errand> errands,
         LocationGraph graph)
     {
         ArgumentNullException.ThrowIfNull(errands);
@@ -36,9 +36,7 @@ public static class OriginalOrderEvaluator
                 nameof(destinationLocationId));
         }
 
-        var orderedErrands = errands
-            .OrderBy(errand => errand.OriginalPosition)
-            .ToArray();
+        var orderedErrands = errands.ToArray();
 
         if (orderedErrands.Select(errand => errand.Id)
                 .Distinct().Count() != orderedErrands.Length ||

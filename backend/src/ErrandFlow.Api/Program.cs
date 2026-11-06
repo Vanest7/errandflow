@@ -195,6 +195,7 @@ builder.Services
     .RemoveAllLoggers();
 
 builder.Services.AddScoped<BuildPlanGraph>();
+builder.Services.AddScoped<EvaluateOriginalPlan>();
 
 var app = builder.Build();
 

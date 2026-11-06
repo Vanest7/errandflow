@@ -12,13 +12,13 @@ public sealed class ValhallaTravelGraphProvider : ITravelGraphProvider
     private readonly HttpClient _httpClient;
     private readonly ValhallaRequestGate _gate;
 
-   public ValhallaTravelGraphProvider(
-    HttpClient httpClient,
-    ValhallaRequestGate gate)
-{
-    _httpClient = httpClient;
-    _gate = gate;
-}
+    public ValhallaTravelGraphProvider(
+     HttpClient httpClient,
+     ValhallaRequestGate gate)
+    {
+        _httpClient = httpClient;
+        _gate = gate;
+    }
 
     public async Task<LocationGraph> BuildAsync(
         IReadOnlyList<RoutingLocation> locations,
@@ -42,11 +42,11 @@ public sealed class ValhallaTravelGraphProvider : ITravelGraphProvider
         ValidateLocations(locationSnapshot);
 
         if (locationSnapshot.Length > 10)
-            {
-                throw new ArgumentException(
-                    "Routing supports at most 10 distinct locations.",
-                    nameof(locations));
-            }
+        {
+            throw new ArgumentException(
+                "Routing supports at most 10 distinct locations.",
+                nameof(locations));
+        }
 
         if (locationSnapshot.Length <= 1)
         {
