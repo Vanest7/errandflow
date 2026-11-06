@@ -53,6 +53,16 @@ public sealed class ApiExceptionHandler : IExceptionHandler
             };
             problem.Extensions["code"] = "plan_revision_conflict";
         }
+        else if (exception is RoutePathUnavailableException)
+        {
+            problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status503ServiceUnavailable,
+                Title = "The route path could not be retrieved."
+            };
+
+            problem.Extensions["code"] = "route_path_unavailable";
+        }
         else if (exception is ArgumentException argument)
         {
             var field = string.IsNullOrEmpty(argument.ParamName)
@@ -82,4 +92,5 @@ public sealed class ApiExceptionHandler : IExceptionHandler
         });
         return true;
     }
+    
 }

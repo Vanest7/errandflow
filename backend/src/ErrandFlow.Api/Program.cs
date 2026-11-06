@@ -196,7 +196,25 @@ builder.Services
 
 builder.Services.AddScoped<BuildPlanGraph>();
 builder.Services.AddScoped<EvaluateOriginalPlan>();
+builder.Services.AddScoped<OptimizePlan>();
+builder.Services.AddScoped<BuildOptimizedPlanRoute>();
 
+builder.Services
+    .AddHttpClient<IRoutePathProvider, ValhallaRoutePathProvider>(
+        client =>
+        {
+            client.BaseAddress = valhallaBaseAddress;
+            client.Timeout = TimeSpan.FromSeconds(10);
+            client.MaxResponseContentBufferSize = 2 * 1024 * 1024;
+
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(
+                "ErrandFlow/1.0");
+
+            client.DefaultRequestHeaders.Add(
+                "X-Client-Id",
+                valhallaClientId);
+        })
+    .RemoveAllLoggers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -14,13 +14,19 @@ public sealed class PlanningController : ControllerBase
 {
     private readonly BuildPlanGraph _buildPlanGraph;
     private readonly EvaluateOriginalPlan _evaluateOriginalPlan;
+    private readonly OptimizePlan _optimizePlan;
+    private readonly BuildOptimizedPlanRoute _buildOptimizedPlanRoute;
 
     public PlanningController(
         BuildPlanGraph buildPlanGraph,
-        EvaluateOriginalPlan evaluateOriginalPlan)
+        EvaluateOriginalPlan evaluateOriginalPlan,
+        OptimizePlan optimizePlan,
+        BuildOptimizedPlanRoute buildOptimizedPlanRoute)
     {
         _buildPlanGraph = buildPlanGraph;
         _evaluateOriginalPlan = evaluateOriginalPlan;
+        _optimizePlan = optimizePlan;
+        _buildOptimizedPlanRoute = buildOptimizedPlanRoute;
     }
 
     [HttpGet("graph")]
@@ -87,4 +93,59 @@ public sealed class PlanningController : ControllerBase
         return Guid.TryParse(userIdClaim, out ownerId)
             && ownerId != Guid.Empty;
     }
+    [HttpGet("optimized")]
+[ResponseCache(
+    NoStore = true,
+    Location = ResponseCacheLocation.None)]
+public async Task<ActionResult<PlanOptimizationDto>> GetOptimizedScheduleAsync(
+    Guid planId,
+    CancellationToken cancellationToken,
+    [FromQuery] TravelMode travelMode = TravelMode.Walking)
+{
+    if (!TryGetOwnerId(out var ownerId))
+    {
+        return Unauthorized();
+    }
+
+    var result = await _optimizePlan.ExecuteAsync(
+        ownerId,
+        planId,
+        travelMode,
+        cancellationToken);
+
+    if (result is null)
+    {
+        return NotFound();
+    }
+
+    return Ok(PlanOptimizationMapper.ToDto(result));
+}
+[HttpGet("optimized/route")]
+[ResponseCache(
+    NoStore = true,
+    Location = ResponseCacheLocation.None)]
+public async Task<ActionResult<OptimizedPlanRouteDto>>
+    GetOptimizedRouteAsync(
+        Guid planId,
+        CancellationToken cancellationToken,
+        [FromQuery] TravelMode travelMode = TravelMode.Walking)
+{
+    if (!TryGetOwnerId(out var ownerId))
+    {
+        return Unauthorized();
+    }
+
+    var result = await _buildOptimizedPlanRoute.ExecuteAsync(
+        ownerId,
+        planId,
+        travelMode,
+        cancellationToken);
+
+    if (result is null)
+    {
+        return NotFound();
+    }
+
+    return Ok(result);
+}
 }
