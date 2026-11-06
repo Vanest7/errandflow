@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using ErrandFlow.Application.Users;
 using ErrandFlow.Application.Users.UseCases;
 using ErrandFlow.Application.Errands.UseCases;
+using ErrandFlow.Application.Errands;
 using ErrandFlow.Application.Locations.UseCases;
 using ErrandFlow.Application.Planning.UseCases;
 using ErrandFlow.Application.Planning;
@@ -87,6 +88,8 @@ builder.Services.AddInfrastructure(
     connectionString,
     databasePassword);
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+builder.Services.AddScoped<IErrandOrderingRepository>(services =>
+    (PlanRepository)services.GetRequiredService<IPlanRepository>());
 builder.Services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
 builder.Services.AddScoped<CreatePlan>();
 builder.Services.AddScoped<GetMyPlans>();
@@ -101,9 +104,12 @@ builder.Services.AddScoped<UpdateErrand>();
 builder.Services.AddScoped<DeleteErrand>();
 builder.Services.AddScoped<GetPlanErrands>();
 builder.Services.AddScoped<SetErrandSchedule>();
+builder.Services.AddScoped<ReorderErrands>();
 builder.Services.AddScoped<CreateLocation>();
 builder.Services.AddScoped<GetLocation>();
 builder.Services.AddScoped<GetPlanLocations>();
+builder.Services.AddScoped<UpdateLocation>();
+builder.Services.AddScoped<DeleteLocation>();
 
 builder.Services.AddScoped<SearchPlaces>();
 builder.Services.AddSingleton<PhotonRequestGate>();

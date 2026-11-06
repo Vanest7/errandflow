@@ -17,6 +17,22 @@ both selected location IDs.
 
 GET /api/plans/{id}/locations returns the owner-scoped locations ordered by label and ID.
 An unknown or other-owner plan returns 404.
+PUT /api/plans/{planId}/locations/{locationId} accepts the editable label, address,
+coordinates and ExpectedRevision. It returns the updated location and plan revision.
+DELETE /api/plans/{planId}/locations/{locationId}?expectedRevision=1 returns 204 only
+when the location is not an errand location or a plan origin/destination; otherwise it
+returns 409 with code location_in_use.
+
+PUT /api/plans/{planId}/errands/order accepts ExpectedRevision and ErrandIds. The list
+must contain every errand in the plan exactly once. It returns the reordered errands and
+the incremented plan revision. Position updates use a transaction and reserve a range
+above the current maximum position before assigning final positions, preserving the
+unique per-plan position constraint even after deletions. If the plan disappears during
+the operation, the endpoint returns 404; a stale revision remains a 409 conflict.
+
+Updating an errand with a new location creates that location but does not delete the
+previous location. Locations are removed only through the explicit location-delete
+endpoint.
 
 PUT /api/plans/{planId}/errands/{errandId}/schedule accepts ExpectedRevision and nullable
 EarliestStartAt, LatestFinishAt and FixedStartAt. Schedule timestamps must be UTC; the

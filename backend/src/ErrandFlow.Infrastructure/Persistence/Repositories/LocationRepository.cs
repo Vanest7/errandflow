@@ -31,6 +31,24 @@ public sealed class LocationRepository : ILocationRepository
             .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public Task<Location?> GetByIdForUpdateAsync(
+        Guid ownerId,
+        Guid planId,
+        Guid locationId,
+        CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Locations
+            .Where(location => location.Id == locationId && location.PlanId == planId)
+            .Where(location => _dbContext.Plans.Any(plan =>
+                plan.Id == location.PlanId && plan.OwnerId == ownerId))
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public void Remove(Location location)
+    {
+        _dbContext.Locations.Remove(location);
+    }
+
     public async Task<IReadOnlyList<Location>> GetByPlanAsync(
         Guid ownerId,
         Guid planId,

@@ -31,4 +31,5 @@ public interface IPlanRepository
     Guid planId,
     ulong expectedRevision,
     CancellationToken cancellationToken = default);
+
 }

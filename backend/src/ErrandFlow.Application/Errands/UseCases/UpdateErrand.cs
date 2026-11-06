@@ -101,7 +101,7 @@ public sealed class UpdateErrand
         }
         else
         {
-            var existingLocation = await _locationRepository.GetByIdAsync(
+            var existingLocation = await _locationRepository.GetByIdForUpdateAsync(
                 ownerId,
                 planId,
                 input.LocationId!.Value,

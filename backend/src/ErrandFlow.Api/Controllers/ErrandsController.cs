@@ -17,6 +17,7 @@ public sealed class ErrandsController : ControllerBase
     private readonly UpdateErrand _updateErrand;
     private readonly DeleteErrand _deleteErrand;
     private readonly SetErrandSchedule _setErrandSchedule;
+    private readonly ReorderErrands _reorderErrands;
 
     public ErrandsController(
         GetPlanErrands getPlanErrands,
@@ -24,7 +25,8 @@ public sealed class ErrandsController : ControllerBase
         CreateErrand createErrand,
         UpdateErrand updateErrand,
         DeleteErrand deleteErrand,
-        SetErrandSchedule setErrandSchedule)
+        SetErrandSchedule setErrandSchedule,
+        ReorderErrands reorderErrands)
     {
         _getPlanErrands = getPlanErrands;
         _getErrand = getErrand;
@@ -32,6 +34,7 @@ public sealed class ErrandsController : ControllerBase
         _updateErrand = updateErrand;
         _deleteErrand = deleteErrand;
         _setErrandSchedule = setErrandSchedule;
+        _reorderErrands = reorderErrands;
     }
 
     [HttpPut("{errandId:guid}/schedule")]
@@ -72,6 +75,18 @@ public sealed class ErrandsController : ControllerBase
             cancellationToken);
 
         return errands is null ? NotFound() : Ok(errands);
+    }
+
+    [HttpPut("order")]
+    public async Task<ActionResult<ReorderErrandsResult>> ReorderAsync(
+        Guid planId,
+        ReorderErrandsInput input,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetOwnerId(out var ownerId)) return Unauthorized();
+        var result = await _reorderErrands.ExecuteAsync(
+            ownerId, planId, input, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
     }
 
     private bool TryGetOwnerId(out Guid ownerId)

@@ -1,6 +1,7 @@
 using ErrandFlow.Application.Places.Exceptions;
 using ErrandFlow.Application.Planning.Exceptions;
 using ErrandFlow.Application.Plans.Exceptions;
+using ErrandFlow.Application.Locations.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,6 +53,15 @@ public sealed class ApiExceptionHandler : IExceptionHandler
                 Title = "The plan was changed by another request."
             };
             problem.Extensions["code"] = "plan_revision_conflict";
+        }
+        else if (exception is LocationInUseException)
+        {
+            problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "The location is still in use."
+            };
+            problem.Extensions["code"] = "location_in_use";
         }
         else if (exception is RoutePathUnavailableException)
         {

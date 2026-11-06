@@ -1,4 +1,5 @@
 using ErrandFlow.Application.Plans;
+using ErrandFlow.Application.Errands;
 using ErrandFlow.Application.Plans.Exceptions;
 using ErrandFlow.Domain.Plans;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ using MySqlConnector;
 
 namespace ErrandFlow.Infrastructure.Persistence.Repositories;
 
-public sealed class PlanRepository : IPlanRepository
+public sealed class PlanRepository : IPlanRepository, IErrandOrderingRepository
 {
     private readonly ErrandFlowDbContext _dbContext;
 
@@ -229,6 +230,86 @@ public async Task<bool> DeleteAsync(
 
     await transaction.CommitAsync(cancellationToken);
 
+    return true;
+}
+
+public async Task<bool> ReorderErrandsAsync(
+    Guid ownerId,
+    Guid planId,
+    ulong expectedRevision,
+    IReadOnlyList<Guid> orderedErrandIds,
+    CancellationToken cancellationToken = default)
+{
+    _dbContext.ChangeTracker.Clear();
+    await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+    var plan = await _dbContext.Plans
+        .AsNoTracking()
+        .SingleOrDefaultAsync(
+            item => item.Id == planId && item.OwnerId == ownerId,
+            cancellationToken);
+    if (plan is null) return false;
+    if (plan.Revision != expectedRevision)
+        throw new PlanConcurrencyException(planId, expectedRevision);
+
+    var maxPosition = await _dbContext.Errands
+        .Where(errand => errand.PlanId == planId)
+        .Select(errand => (uint?)errand.OriginalPosition)
+        .MaxAsync(cancellationToken) ?? 0u;
+
+    var errandCount = checked((uint)orderedErrandIds.Count);
+    if (errandCount > uint.MaxValue - maxPosition)
+    {
+        throw new InvalidOperationException(
+            "The errand positions cannot be temporarily moved without exceeding UInt32 capacity.");
+    }
+
+    for (var position = 0u; position < errandCount; position++)
+    {
+        var errandId = orderedErrandIds[checked((int)position)];
+        var temporaryPosition = checked(maxPosition + 1u + position);
+
+        await _dbContext.Errands
+            .Where(errand => errand.PlanId == planId && errand.Id == errandId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(
+                errand => errand.OriginalPosition,
+                temporaryPosition), cancellationToken);
+    }
+
+    for (var position = 0; position < orderedErrandIds.Count; position++)
+    {
+        var errandId = orderedErrandIds[position];
+        await _dbContext.Errands
+            .Where(errand => errand.PlanId == planId && errand.Id == errandId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(
+                errand => errand.OriginalPosition,
+                (uint)position), cancellationToken);
+    }
+
+    var affectedPlans = await _dbContext.Plans
+        .Where(item => item.Id == planId &&
+                       item.OwnerId == ownerId &&
+                       item.Revision == expectedRevision)
+        .ExecuteUpdateAsync(setters => setters
+            .SetProperty(item => item.Revision, expectedRevision + 1UL)
+            .SetProperty(item => item.UpdatedAt, DateTime.UtcNow), cancellationToken);
+
+    if (affectedPlans == 0)
+    {
+        var planExists = await _dbContext.Plans
+            .AnyAsync(
+                item => item.Id == planId && item.OwnerId == ownerId,
+                cancellationToken);
+
+        if (!planExists)
+        {
+            return false;
+        }
+
+        throw new PlanConcurrencyException(planId, expectedRevision);
+    }
+
+    await transaction.CommitAsync(cancellationToken);
     return true;
 }
 }

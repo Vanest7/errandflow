@@ -266,6 +266,42 @@ public bool RemoveErrand(Guid errandId)
 
     return true;
 }
+
+public bool RemoveLocation(Guid locationId)
+{
+    if (locationId == Guid.Empty)
+    {
+        throw new ArgumentException(
+            "Location ID cannot be empty.",
+            nameof(locationId));
+    }
+
+    if (OriginLocationId == locationId ||
+        DestinationLocationId == locationId ||
+        _errands.Any(errand => errand.LocationId == locationId))
+    {
+        return false;
+    }
+
+    Revision = checked(Revision + 1UL);
+    UpdatedAt = DateTime.UtcNow;
+    return true;
+}
+
+public void ValidateErrandOrder(IReadOnlyList<Guid> orderedErrandIds)
+{
+    ArgumentNullException.ThrowIfNull(orderedErrandIds);
+
+    if (orderedErrandIds.Count != _errands.Count ||
+        orderedErrandIds.Any(id => id == Guid.Empty) ||
+        orderedErrandIds.Distinct().Count() != _errands.Count ||
+        orderedErrandIds.Any(id => !_errands.Any(errand => errand.Id == id)))
+    {
+        throw new ArgumentException(
+            "The order must contain each plan errand exactly once.",
+            nameof(orderedErrandIds));
+    }
+}
 public Errand? SetErrandSchedule(
     Guid errandId,
     DateTime? earliestStartAt,
@@ -332,6 +368,12 @@ public Location CreateLocation(
     UpdatedAt = DateTime.UtcNow;
 
     return location;
+}
+
+public void UpdateRevision()
+{
+    Revision = checked(Revision + 1UL);
+    UpdatedAt = DateTime.UtcNow;
 }
 
 private static void ValidateLocationId(Guid? locationId, string parameterName)

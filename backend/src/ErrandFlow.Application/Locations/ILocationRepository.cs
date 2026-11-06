@@ -15,7 +15,15 @@ public interface ILocationRepository
         Guid locationId,
         CancellationToken cancellationToken = default);
 
-        Task AddAsync(
+    Task<Location?> GetByIdForUpdateAsync(
+        Guid ownerId,
+        Guid planId,
+        Guid locationId,
+        CancellationToken cancellationToken = default);
+
+    void Remove(Location location);
+
+    Task AddAsync(
     Location location,
     CancellationToken cancellationToken = default);
 }

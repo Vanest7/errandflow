@@ -14,15 +14,21 @@ public sealed class LocationsController : ControllerBase
     private readonly CreateLocation _createLocation;
     private readonly GetLocation _getLocation;
     private readonly GetPlanLocations _getPlanLocations;
+    private readonly UpdateLocation _updateLocation;
+    private readonly DeleteLocation _deleteLocation;
 
     public LocationsController(
         CreateLocation createLocation,
         GetLocation getLocation,
-        GetPlanLocations getPlanLocations)
+        GetPlanLocations getPlanLocations,
+        UpdateLocation updateLocation,
+        DeleteLocation deleteLocation)
     {
         _createLocation = createLocation;
         _getLocation = getLocation;
         _getPlanLocations = getPlanLocations;
+        _updateLocation = updateLocation;
+        _deleteLocation = deleteLocation;
     }
 
     [HttpGet]
@@ -93,6 +99,34 @@ public sealed class LocationsController : ControllerBase
                 locationId = result.Location.Id
             },
             result);
+    }
+
+    [HttpPut("{locationId:guid}")]
+    public async Task<ActionResult<LocationMutationResult>> UpdateAsync(
+        Guid planId,
+        Guid locationId,
+        UpdateLocationInput input,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetOwnerId(out var ownerId)) return Unauthorized();
+
+        var result = await _updateLocation.ExecuteAsync(
+            ownerId, planId, locationId, input, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpDelete("{locationId:guid}")]
+    public async Task<IActionResult> DeleteAsync(
+        Guid planId,
+        Guid locationId,
+        [FromQuery] ulong expectedRevision,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetOwnerId(out var ownerId)) return Unauthorized();
+
+        var deleted = await _deleteLocation.ExecuteAsync(
+            ownerId, planId, locationId, expectedRevision, cancellationToken);
+        return deleted ? NoContent() : NotFound();
     }
 
     private bool TryGetOwnerId(out Guid ownerId)

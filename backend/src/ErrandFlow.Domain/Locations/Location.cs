@@ -45,6 +45,21 @@ public sealed class Location
         Longitude = longitude;
     }
 
+    public void UpdateDetails(
+        string label,
+        string? address,
+        decimal latitude,
+        decimal longitude)
+    {
+        var normalizedLabel = NormalizeLabel(label);
+        var normalizedAddress = NormalizeAddress(address);
+        ValidateCoordinates(latitude, longitude);
+        Label = normalizedLabel;
+        Address = normalizedAddress;
+        Latitude = latitude;
+        Longitude = longitude;
+    }
+
     private static string NormalizeLabel(string label)
     {
         if (string.IsNullOrWhiteSpace(label))

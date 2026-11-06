@@ -55,3 +55,19 @@ checks, git diff --check, and live bakery/supermarket/named-store adapter smoke 
 results each after an earlier timeout). Authenticated API checks remain pending.
 Next: apply the incremental change and run the new examples in Places.http with a token;
 then connect Angular search/map selection. Provider coverage is not exhaustive.
+
+Location and errand ordering correction (2026-11-06): added revision-aware location
+update/delete endpoints, ownership-scoped tracking queries, location-in-use conflict
+mapping, cleanup of an old unreferenced location when an errand receives a new one,
+and PUT /api/plans/{planId}/errands/order with exact-ID validation and transactional
+position updates. Build and the existing 62 backend tests pass after the change.
+Not run: live JWT/API checks, MariaDB execution, and real two-user authorization checks.
+The new contracts are documented in docs/backend-contracts.md.
+
+Follow-up correction (2026-11-06): errand reordering now reserves consecutive temporary
+positions above the current maximum, checks UInt32 capacity, and returns an explicit
+not-found result when the plan disappears during the transaction; revision conflicts
+remain PlanConcurrencyException/409. Updating an errand with a new location no longer
+deletes the previous location; deletion remains explicit through the location endpoint.
+Verified with API build (0 warnings/errors), 62 existing backend tests, and git diff
+--check. MariaDB execution and live HTTP/concurrency checks remain not run.
