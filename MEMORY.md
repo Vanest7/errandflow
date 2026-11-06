@@ -1,5 +1,5 @@
 # Project handoff
-Updated: 2026-11-05
+Updated: 2026-11-06
 Phase: backend Plans, Locations and Errands contracts.
 Active spec: specs/001-place-search/spec.md; prior corrections in docs/backend-contracts.md.
 
@@ -71,3 +71,18 @@ remain PlanConcurrencyException/409. Updating an errand with a new location no l
 deletes the previous location; deletion remains explicit through the location endpoint.
 Verified with API build (0 warnings/errors), 62 existing backend tests, and git diff
 --check. MariaDB execution and live HTTP/concurrency checks remain not run.
+
+Frontend auth and OpenAPI integration (2026-11-06): moved Auth0 configuration,
+login/logout, local-user registration and `/api/auth/me` identity synchronization into
+`core/auth` (`auth.config.ts`, `auth.facade.ts`, `data-access/auth-api.service.ts`);
+`app.ts` now only composes the shell and router outlet. Added `ng-openapi-gen` with a
+committed `openapi/errandflow.json` snapshot and generated `core/api/generated/`
+(32 models, 6 services). Centralized the API base URL in `core/config/api.config.ts`
+and provided it to the generated `ApiConfiguration`. Added `api:snapshot`,
+`api:generate` and `api:update` scripts. Corrected the backend `GET /api/auth/me`
+contract to return a typed `AuthMeResponse` instead of an anonymous body.
+Verified: frontend lint, 4 Vitest tests, development and production builds, Prettier
+check, backend API build (0 warnings/errors) and generation from a temporary API
+instance. NOT RUN: authenticated browser login/profile flow and live API calls with a
+real token. Next: add the first plans feature page and data-access service; add
+Transloco ES/EN when the related screens are built.

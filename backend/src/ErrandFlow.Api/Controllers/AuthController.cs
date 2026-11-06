@@ -8,6 +8,11 @@ namespace ErrandFlow.Api.Controllers;
 
 public sealed record RegisterCurrentUserRequest(string? DisplayName);
 
+public sealed record AuthMeResponse(
+    string ExternalUserId,
+    Guid? LocalUserId,
+    bool IsRegistered);
+
 [ApiController]
 [Route("api/auth")]
 [Authorize]
@@ -25,7 +30,7 @@ public sealed class AuthController : ControllerBase
     }
 
     [HttpGet("me")]
-    public async Task<IActionResult> GetCurrentUserAsync(
+    public async Task<ActionResult<AuthMeResponse>> GetCurrentUserAsync(
         CancellationToken cancellationToken)
     {
         var externalUserId = User.FindFirstValue("sub");
@@ -39,12 +44,10 @@ public sealed class AuthController : ControllerBase
             externalUserId,
             cancellationToken);
 
-        return Ok(new
-        {
-            ExternalUserId = externalUserId,
-            LocalUserId = localUserId,
-            IsRegistered = localUserId.HasValue
-        });
+        return Ok(new AuthMeResponse(
+            externalUserId,
+            localUserId,
+            localUserId.HasValue));
     }
 
     [HttpPost("me")]

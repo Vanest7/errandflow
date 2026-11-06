@@ -1,1 +1,15 @@
 @import 'tailwindcss';
+
+@theme inline {
+  --color-app-bg: var(--ef-bg);
+  --color-app-surface: var(--ef-surface);
+  --color-app-raised: var(--ef-surface-raised);
+  --color-app-border: var(--ef-border);
+
+  --color-app-text: var(--ef-text);
+  --color-app-muted: var(--ef-text-muted);
+
+  --color-app-primary: var(--ef-primary);
+  --color-app-on-primary: var(--ef-on-primary);
+  --color-app-accent: var(--ef-accent);
+}
