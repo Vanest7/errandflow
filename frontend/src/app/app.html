@@ -1,6 +1,10 @@
 <main class="flex min-h-screen flex-col items-center justify-center gap-6 p-6">
   <h1 class="text-3xl font-bold">ErrandFlow</h1>
-
+  <ng-container *transloco="let t">
+    <h2 class="text-xl text-app-primary">
+      {{ t('app.welcome') }}
+    </h2>
+  </ng-container>
   @if (auth.isLoading()) {
     <p>Checking authentication...</p>
   } @else if (auth.error(); as error) {

@@ -1,0 +1,10 @@
+{
+  "app": {
+    "title": "ErrandFlow",
+    "welcome": "Bienvenido a ErrandFlow"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  }
+}

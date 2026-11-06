@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideTransloco } from '@jsverse/transloco';
 import { App } from './app';
 import { AuthFacade } from './core/auth/auth.facade';
 
@@ -10,6 +11,16 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideRouter([]),
+        provideTransloco({
+          config: {
+            availableLangs: ['es'],
+            defaultLang: 'es',
+            fallbackLang: 'es',
+          },
+          loader: {
+            getTranslation: () => Promise.resolve({ app: { welcome: 'Bienvenido' } }),
+          },
+        }),
         {
           provide: AuthFacade,
           useValue: {
