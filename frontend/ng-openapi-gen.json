@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/ng-openapi-gen/ng-openapi-gen-schema.json",
+  "input": "openapi/errandflow.json",
+  "output": "src/app/core/api/generated",
+  "promises": false,
+  "services": true,
+  "indexFile": true,
+  "removeStaleFiles": true,
+  "ignoreUnusedModels": false
+}

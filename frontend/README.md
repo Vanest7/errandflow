@@ -54,6 +54,30 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
+## OpenAPI client
+
+The typed Angular client lives in `src/app/core/api/generated/`. It is generated
+from the committed OpenAPI snapshot in `openapi/errandflow.json` and must not be
+edited by hand.
+
+Start the backend in Development mode and regenerate the snapshot and client:
+
+```bash
+npm run api:update
+```
+
+To regenerate only from the existing snapshot:
+
+```bash
+npm run api:generate
+```
+
+The snapshot command uses `curl -k` because the local ASP.NET Core development
+certificate may not be trusted. Do not use that flag against a remote API.
+
+The backend base URL is defined once in `src/app/core/config/api.config.ts` and
+provided to the generated `ApiConfiguration`.
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

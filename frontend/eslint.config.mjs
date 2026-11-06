@@ -13,6 +13,7 @@ export default [
       '**/out-tsc/**',
       '**/coverage/**',
       '**/.angular/**',
+      'src/app/core/api/generated/**',
     ],
   },
 

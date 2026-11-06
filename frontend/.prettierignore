@@ -1,0 +1,6 @@
+node_modules
+dist
+coverage
+.angular
+src/app/core/api/generated
+openapi

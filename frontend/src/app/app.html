@@ -1,39 +1,35 @@
 <main class="flex min-h-screen flex-col items-center justify-center gap-6 p-6">
   <h1 class="text-3xl font-bold">ErrandFlow</h1>
 
-  @if (auth.isLoading$ | async) {
+  @if (auth.isLoading()) {
     <p>Checking authentication...</p>
-
-  } @else if (auth.error$ | async; as error) {
+  } @else if (auth.error(); as error) {
     <div class="rounded-lg border border-red-300 bg-red-50 p-4 text-red-800">
       <h2 class="font-semibold">Authentication failed</h2>
-      <p>{{ error.message }}</p>
+      <p>{{ error }}</p>
     </div>
+  } @else if (auth.isAuthenticated()) {
+    <p class="font-semibold text-green-600">Signed in successfully!</p>
 
-  } @else if (auth.isAuthenticated$ | async) {
-    <p class="font-semibold text-green-600">
-      Signed in successfully!
-    </p>
-
-    @if (auth.user$ | async; as user) {
+    @if (auth.user(); as user) {
       <p>Welcome, {{ user.name }}</p>
     }
 
-    <!-- API identity verification -->
+    @if (auth.isSynchronizing()) {
+      <p>Synchronizing your profile...</p>
+    }
+
     <button
       type="button"
       class="rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-700"
-      (click)="checkApiIdentity()"
+      (click)="auth.refreshIdentity()"
     >
       Check API identity
     </button>
 
-    <!-- API response -->
-    @if (apiUser(); as profile) {
+    @if (auth.identity(); as profile) {
       <div class="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 class="mb-4 text-lg font-bold text-gray-800">
-          API Identity
-        </h2>
+        <h2 class="mb-4 text-lg font-bold text-gray-800">API Identity</h2>
 
         <div class="space-y-3 text-sm text-gray-700">
           <p>
@@ -49,22 +45,22 @@
       </div>
     }
 
-
     <button
       type="button"
       class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700"
-      (click)="logout()"
+      (click)="auth.logout()"
     >
       Sign out
     </button>
-
   } @else {
     <button
       type="button"
       class="rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-700"
-      (click)="login()"
+      (click)="auth.login()"
     >
       Sign in
     </button>
   }
 </main>
+
+<router-outlet />
