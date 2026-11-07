@@ -18,6 +18,21 @@
       "maxLength": "Enter no more than {{max}} characters"
     }
   },
+  "landing": {
+    "title": "Plan your errands",
+    "titleAccent": "without the extra detours.",
+    "description": "Organize your stops on a map and explore a route that considers travel times and schedules.",
+    "cta": "Get started",
+    "mapAlt": "Illustration of a map showing a route connecting several stops, including a pharmacy and a grocery store.",
+    "benefits": {
+      "organize": "Organize your errands",
+      "routes": "Optimize your routes",
+      "time": "Make the most of your time"
+    }
+  },
+  "language": {
+    "select": "Select language"
+  },
   "plans": {
     "form": {
       "name": "Plan name",

@@ -18,6 +18,21 @@
       "maxLength": "Introduce como máximo {{max}} caracteres"
     }
   },
+  "landing": {
+    "title": "Planifica tus recados",
+    "titleAccent": "sin dar vueltas de más.",
+    "description": "Organiza tus paradas en un mapa y consulta un recorrido que tiene en cuenta desplazamientos y horarios.",
+    "cta": "Empezar",
+    "mapAlt": "Ilustración de un mapa con una ruta que conecta distintas paradas, como una farmacia y un supermercado.",
+    "benefits": {
+      "organize": "Organiza tus recados",
+      "routes": "Optimiza tus rutas",
+      "time": "Aprovecha mejor tu tiempo"
+    }
+  },
+  "language": {
+    "select": "Seleccionar idioma"
+  },
   "plans": {
     "form": {
       "name": "Nombre del plan",

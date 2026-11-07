@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { AuthFacade } from '../../auth/auth.facade';
+import { LanguageService } from '../../../i18n/language.service';
 
 @Component({
   selector: 'app-header',
@@ -9,4 +10,5 @@ import { AuthFacade } from '../../auth/auth.facade';
 })
 export class Header {
   protected readonly auth = inject(AuthFacade);
+  protected readonly language = inject(LanguageService);
 }

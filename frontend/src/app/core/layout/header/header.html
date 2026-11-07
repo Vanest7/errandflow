@@ -3,39 +3,79 @@
   class="sticky top-0 z-50 w-full border-b border-[var(--ef-border)] bg-[var(--ef-surface)]"
 >
   <div
-    class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4"
+    class="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-4 sm:gap-4 sm:px-6"
   >
     <!-- Brand -->
-    <a href="/" class="flex items-center gap-3">
+    <a href="/" class="flex shrink-0 items-center gap-3">
       <img
-        src="/favicon.ico"
+        src="/errandflow-logo.svg"
         alt=""
         width="40"
         height="40"
         class="h-10 w-10 object-contain"
       />
 
-      <span class="text-xl font-bold tracking-tight">
+      <span class="hidden text-xl font-bold tracking-tight sm:block">
         ErrandFlow
       </span>
     </a>
 
-    <!-- Authentication actions -->
-    <div class="flex items-center gap-4">
+    <!-- Header actions -->
+    <div class="flex items-center gap-2 sm:gap-4">
+
+      <!-- Language selector -->
+      <div
+        class="relative flex h-11 items-center gap-2 rounded-xl border border-[var(--ef-border)] px-3 text-[var(--ef-text)] transition-colors hover:bg-[var(--ef-surface-raised)] focus-within:ring-2 focus-within:ring-[var(--ef-primary)]"
+      >
+        <!-- Globe icon -->
+        <span
+          class="material-symbols-outlined pointer-events-none text-[22px]"
+          aria-hidden="true"
+        >
+    language
+  </span>
+
+        <!-- Visible language label -->
+        <span class="pointer-events-none text-sm font-semibold uppercase">
+    {{ language.activeLanguage() }}
+  </span>
+
+        <!-- Dropdown arrow -->
+        <span
+          class="material-symbols-outlined pointer-events-none text-[20px]"
+          aria-hidden="true"
+        >
+    expand_more
+  </span>
+
+        <!-- Interactive select -->
+        <select
+          #languageSelect
+          [value]="language.activeLanguage()"
+          [attr.aria-label]="t('language.select')"
+          (change)="language.setLanguage(languageSelect.value)"
+          class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+        >
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <!-- Authentication -->
       @if (auth.isLoading()) {
         <span class="text-sm text-[var(--ef-text-muted)]">
           {{ t('auth.loading') }}
         </span>
       } @else if (auth.isAuthenticated()) {
         @if (auth.user(); as user) {
-          <span class="hidden text-sm text-[var(--ef-text-muted)] sm:block">
+          <span class="hidden text-sm text-[var(--ef-text-muted)] md:block">
             {{ user.name ?? user.email }}
           </span>
         }
 
         <button
           type="button"
-          class="rounded-lg border border-[var(--ef-border)] px-5 py-2.5 font-medium transition-colors hover:bg-[var(--ef-surface-raised)]"
+          class="min-h-10 rounded-xl border border-[var(--ef-border)] px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--ef-surface-raised)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] sm:px-5 sm:text-base"
           (click)="auth.logout()"
         >
           {{ t('auth.signOut') }}
@@ -43,12 +83,13 @@
       } @else {
         <button
           type="button"
-          class="rounded-lg bg-[var(--ef-primary)] px-6 py-2.5 font-semibold text-[var(--ef-on-primary)] transition-opacity hover:opacity-90"
+          class="min-h-10 rounded-xl bg-[var(--ef-primary)] px-3 py-2 text-sm font-semibold text-[var(--ef-on-primary)] transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] sm:px-6 sm:text-base"
           (click)="auth.login()"
         >
           {{ t('auth.signIn') }}
         </button>
       }
+
     </div>
   </div>
 </header>

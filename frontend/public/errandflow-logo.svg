@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="144" height="120" viewBox="0 0 144 120" role="img" aria-labelledby="title description">
+  <title id="title">ErrandFlow logo</title>
+  <desc id="description">Turquoise location pin above a winding turquoise and coral route.</desc>
+  <defs>
+    <linearGradient id="routeGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00E5C3"/>
+      <stop offset="0.42" stop-color="#60E9DE"/>
+      <stop offset="0.68" stop-color="#D5CBC0"/>
+      <stop offset="1" stop-color="#FF805C"/>
+    </linearGradient>
+    <linearGradient id="pinGradient" x1="0" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#13F0CB"/>
+      <stop offset="1" stop-color="#00CDB3"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Coral base of the route: rounded and broad like the original mark. -->
+  <path
+    d="M23 85 C16 87 12 93 12 101 C12 110 19 115 29 115
+       H100 C123 115 139 103 140 88 C141 73 128 62 107 55
+       L98 67 C114 74 123 80 121 88 C119 96 109 99 94 99
+       H31 C27 99 24 93 23 85 Z"
+    fill="#FF805C"
+  />
+
+  <!-- Curving street / route from behind the pin to the far turnaround. -->
+  <path
+    d="M75 33 C93 29 114 29 125 32
+       C137 36 131 41 121 43
+       C111 45 93 46 87 50
+       C81 54 97 57 108 62
+       C123 69 129 76 127 86
+       C125 99 109 106 88 106
+       H51"
+    fill="none"
+    stroke="#123843"
+    stroke-opacity="0.9"
+    stroke-width="11"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M75 33 C93 29 114 29 125 32
+       C137 36 131 41 121 43
+       C111 45 93 46 87 50
+       C81 54 97 57 108 62
+       C123 69 129 76 127 86
+       C125 99 109 106 88 106
+       H51"
+    fill="none"
+    stroke="url(#routeGradient)"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Small dash on the foreground route. -->
+  <path d="M35 106 H52" stroke="#F0F6F8" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Location pin with a genuine transparent hole. -->
+  <path
+    fill="url(#pinGradient)"
+    fill-rule="evenodd"
+    d="M48 7 C29 7 17 20 17 37
+       C17 54 29 65 48 86
+       C67 65 79 54 79 37
+       C79 20 67 7 48 7 Z
+       M48 25 A12 12 0 1 0 48 49 A12 12 0 1 0 48 25 Z"
+  />
+</svg>
