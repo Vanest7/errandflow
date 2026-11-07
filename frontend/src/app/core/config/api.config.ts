@@ -5,4 +5,4 @@
  * Configure a deployment-specific value here instead of hard-coding URLs in
  * feature services or components.
  */
-export const API_ROOT_URL = 'https://localhost:7094/';
+export const API_ROOT_URL = 'https://localhost:7094';

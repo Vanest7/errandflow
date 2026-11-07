@@ -6,5 +6,24 @@
   "common": {
     "save": "Save",
     "cancel": "Cancel"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "loading": "Checking session..."
+  },
+  "forms": {
+    "errors": {
+      "required": "This field is required",
+      "maxLength": "Enter no more than {{max}} characters"
+    }
+  },
+  "plans": {
+    "form": {
+      "name": "Plan name",
+      "planDate": "Date",
+      "departureTime": "Departure time",
+      "timeZone": "Plan time zone"
+    }
   }
 }

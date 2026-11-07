@@ -9,6 +9,6 @@ export const auth0Config: AuthConfig = {
     audience: 'https://api.errandflow.local',
   },
   httpInterceptor: {
-    allowedList: [`${API_ROOT_URL}api/*`],
+    allowedList: [`${API_ROOT_URL}/api/*`],
   },
 };

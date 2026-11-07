@@ -1,0 +1,38 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <app-form-input
+      class="sm:col-span-2"
+      [control]="form.controls.name"
+      labelKey="plans.form.name"
+      [required]="true"
+      [maxLength]="150"
+    />
+
+    <app-form-input
+      [control]="form.controls.planDate"
+      labelKey="plans.form.planDate"
+      type="date"
+      [required]="true"
+    />
+
+    <app-form-input
+      [control]="form.controls.departureTime"
+      labelKey="plans.form.departureTime"
+      type="time"
+      [required]="true"
+    />
+  </div>
+
+  <p class="text-sm text-app-muted">
+    {{ 'plans.form.timeZone' | transloco }}: {{ effectiveTimeZone() }}
+  </p>
+
+  <div class="flex flex-wrap justify-end gap-3">
+    <button matButton="outlined" type="button" [disabled]="saving()" (click)="cancelled.emit()">
+      {{ 'common.cancel' | transloco }}
+    </button>
+    <button matButton="filled" type="submit" [disabled]="saving()">
+      {{ 'common.save' | transloco }}
+    </button>
+  </div>
+</form>

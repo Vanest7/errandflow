@@ -1,0 +1,54 @@
+<header
+  *transloco="let t"
+  class="sticky top-0 z-50 w-full border-b border-[var(--ef-border)] bg-[var(--ef-surface)]"
+>
+  <div
+    class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4"
+  >
+    <!-- Brand -->
+    <a href="/" class="flex items-center gap-3">
+      <img
+        src="/favicon.ico"
+        alt=""
+        width="40"
+        height="40"
+        class="h-10 w-10 object-contain"
+      />
+
+      <span class="text-xl font-bold tracking-tight">
+        ErrandFlow
+      </span>
+    </a>
+
+    <!-- Authentication actions -->
+    <div class="flex items-center gap-4">
+      @if (auth.isLoading()) {
+        <span class="text-sm text-[var(--ef-text-muted)]">
+          {{ t('auth.loading') }}
+        </span>
+      } @else if (auth.isAuthenticated()) {
+        @if (auth.user(); as user) {
+          <span class="hidden text-sm text-[var(--ef-text-muted)] sm:block">
+            {{ user.name ?? user.email }}
+          </span>
+        }
+
+        <button
+          type="button"
+          class="rounded-lg border border-[var(--ef-border)] px-5 py-2.5 font-medium transition-colors hover:bg-[var(--ef-surface-raised)]"
+          (click)="auth.logout()"
+        >
+          {{ t('auth.signOut') }}
+        </button>
+      } @else {
+        <button
+          type="button"
+          class="rounded-lg bg-[var(--ef-primary)] px-6 py-2.5 font-semibold text-[var(--ef-on-primary)] transition-opacity hover:opacity-90"
+          (click)="auth.login()"
+        >
+          {{ t('auth.signIn') }}
+        </button>
+      }
+    </div>
+  </div>
+</header>

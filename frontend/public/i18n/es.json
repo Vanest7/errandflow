@@ -6,5 +6,24 @@
   "common": {
     "save": "Guardar",
     "cancel": "Cancelar"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "loading": "Comprobando sesión..."
+  },
+  "forms": {
+    "errors": {
+      "required": "Este campo es obligatorio",
+      "maxLength": "Introduce como máximo {{max}} caracteres"
+    }
+  },
+  "plans": {
+    "form": {
+      "name": "Nombre del plan",
+      "planDate": "Fecha",
+      "departureTime": "Hora de salida",
+      "timeZone": "Zona horaria del plan"
+    }
   }
 }
