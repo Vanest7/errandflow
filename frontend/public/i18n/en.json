@@ -10,13 +10,20 @@
   "auth": {
     "signIn": "Sign in",
     "signOut": "Sign out",
-    "loading": "Checking session..."
+    "loading": "Checking session...",
+    "signInShort": "Log in",
+    "signOutShort": "Log out"
   },
   "forms": {
     "errors": {
       "required": "This field is required",
       "maxLength": "Enter no more than {{max}} characters"
     }
+  },
+  "theme": {
+    "darkMode": "Dark mode",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
   },
   "landing": {
     "title": "Plan your errands",

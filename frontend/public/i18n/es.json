@@ -10,7 +10,9 @@
   "auth": {
     "signIn": "Iniciar sesión",
     "signOut": "Cerrar sesión",
-    "loading": "Comprobando sesión..."
+    "loading": "Comprobando sesión...",
+    "signInShort": "Entrar",
+    "signOutShort": "Salir"
   },
   "forms": {
     "errors": {
@@ -32,6 +34,11 @@
   },
   "language": {
     "select": "Seleccionar idioma"
+  },
+  "theme": {
+    "darkMode": "Modo oscuro",
+    "switchToLight": "Cambiar al modo claro",
+    "switchToDark": "Cambiar al modo oscuro"
   },
   "plans": {
     "form": {

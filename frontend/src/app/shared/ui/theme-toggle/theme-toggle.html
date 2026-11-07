@@ -1,0 +1,37 @@
+<button
+  *transloco="let t"
+  type="button"
+  role="switch"
+  class="theme-toggle"
+  [class.theme-toggle--dark]="theme.isDark()"
+  [attr.aria-checked]="theme.isDark()"
+  [attr.aria-label]="t('theme.darkMode')"
+  [attr.title]="t(theme.isDark() ? 'theme.switchToLight' : 'theme.switchToDark')"
+  (click)="onClick()"
+  (pointerdown)="onPointerDown($event)"
+  (pointerup)="onPointerUp($event)"
+  (pointercancel)="onPointerCancel()"
+  (keydown.arrowleft)="onArrowLeft($event)"
+  (keydown.arrowright)="onArrowRight($event)"
+>
+  <!-- Sliding indicator -->
+  <span
+    class="theme-toggle__thumb"
+    aria-hidden="true"
+  ></span>
+
+  <!-- Theme icons -->
+  <span class="theme-toggle__icons" aria-hidden="true">
+    <span
+      class="material-symbols-outlined theme-toggle__icon theme-toggle__icon--light"
+    >
+      light_mode
+    </span>
+
+    <span
+      class="material-symbols-outlined theme-toggle__icon theme-toggle__icon--dark"
+    >
+      dark_mode
+    </span>
+  </span>
+</button>

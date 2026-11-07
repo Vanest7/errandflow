@@ -1,30 +1,35 @@
 @use '@angular/material' as mat;
 
 :root {
-  --ef-bg: #1b2834;
-  --ef-surface: #253746;
-  --ef-surface-raised: #314858;
-  --ef-border: #415968;
+  color-scheme: light dark;
 
-  --ef-text: #f0f6f8;
-  --ef-text-muted: #b6c8d2;
+  // Backgrounds
+  --ef-bg: light-dark(#f5f8fa, #1b2834);
+  --ef-surface: light-dark(#ffffff, #253746);
+  --ef-surface-raised: light-dark(#eaf1f4, #314858);
+  --ef-border: light-dark(#cbd8df, #415968);
 
-  --ef-primary: #00e5c3;
-  --ef-on-primary: #082c2e;
-  --ef-accent: #ff805c;
+  // Text
+  --ef-text: light-dark(#1b2834, #f0f6f8);
+  --ef-text-muted: light-dark(#526774, #b6c8d2);
 
+  // Brand colors
+  --ef-primary: light-dark(#007f70, #00e5c3);
+  --ef-on-primary: light-dark(#ffffff, #082c2e);
+  --ef-accent: light-dark(#d65a3d, #ff805c);
+
+  // Layout
   --ef-radius-card: 18px;
 }
 
 html {
-  color-scheme: dark;
   min-height: 100%;
 
   @include mat.theme((
     color: (
       primary: mat.$cyan-palette,
       tertiary: mat.$orange-palette,
-      theme-type: dark,
+      theme-type: color-scheme,
     ),
     typography: Roboto,
     density: 0,
@@ -43,6 +48,14 @@ html {
   ));
 
   @include mat.strong-focus-indicators();
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 body {

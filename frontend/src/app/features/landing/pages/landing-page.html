@@ -82,7 +82,9 @@
     <!-- Route illustration -->
     <div class="w-full">
       <img
-        src="/images/errandflow-route-hero.webp"
+        [src]="theme.isDark()
+      ? '/images/errandflow-route-hero.webp'
+      : '/images/Errandflow-light.webp'"
         [alt]="t('landing.mapAlt')"
         width="790"
         height="620"

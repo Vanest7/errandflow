@@ -22,6 +22,7 @@
 
     <!-- Header actions -->
     <div class="flex items-center gap-2 sm:gap-4">
+      <app-theme-toggle />
 
       <!-- Language selector -->
       <div
@@ -64,13 +65,13 @@
       <!-- Authentication -->
       @if (auth.isLoading()) {
         <span class="text-sm text-[var(--ef-text-muted)]">
-          {{ t('auth.loading') }}
-        </span>
+    {{ t('auth.loading') }}
+  </span>
       } @else if (auth.isAuthenticated()) {
         @if (auth.user(); as user) {
           <span class="hidden text-sm text-[var(--ef-text-muted)] md:block">
-            {{ user.name ?? user.email }}
-          </span>
+      {{ user.name ?? user.email }}
+    </span>
         }
 
         <button
@@ -78,7 +79,8 @@
           class="min-h-10 rounded-xl border border-[var(--ef-border)] px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--ef-surface-raised)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] sm:px-5 sm:text-base"
           (click)="auth.logout()"
         >
-          {{ t('auth.signOut') }}
+          <span class="sm:hidden">{{ t('auth.signOutShort') }}</span>
+          <span class="hidden sm:inline">{{ t('auth.signOut') }}</span>
         </button>
       } @else {
         <button
@@ -86,7 +88,8 @@
           class="min-h-10 rounded-xl bg-[var(--ef-primary)] px-3 py-2 text-sm font-semibold text-[var(--ef-on-primary)] transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] sm:px-6 sm:text-base"
           (click)="auth.login()"
         >
-          {{ t('auth.signIn') }}
+          <span class="sm:hidden">{{ t('auth.signInShort') }}</span>
+          <span class="hidden sm:inline">{{ t('auth.signIn') }}</span>
         </button>
       }
 
