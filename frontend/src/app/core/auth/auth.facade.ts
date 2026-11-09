@@ -49,7 +49,7 @@ export class AuthFacade {
   }
 
   login(): void {
-    this.auth0.loginWithRedirect().subscribe({
+    this.auth0.loginWithRedirect({ appState: { target: '/plans' } }).subscribe({
       error: (error: unknown) => {
         console.error('Auth0 login failed:', error);
       },
@@ -72,6 +72,16 @@ export class AuthFacade {
     }
 
     this.loadIdentity().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+  }
+
+  retryProfileSynchronization(): void {
+    const user = this.user();
+    if (!this.isAuthenticated() || !user || this.isSynchronizing()) {
+      return;
+    }
+
+    this.profileError.set(null);
+    this.registerProfile(user).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   private synchronizeProfile(): Observable<AuthMeResponse | null> {

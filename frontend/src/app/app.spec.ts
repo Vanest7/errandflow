@@ -34,6 +34,7 @@ describe('App', () => {
             login: () => undefined,
             logout: () => undefined,
             refreshIdentity: () => undefined,
+            retryProfileSynchronization: () => undefined,
           },
         },
       ],
@@ -42,15 +43,15 @@ describe('App', () => {
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should render the application title', async () => {
+  it('should render the router outlet while signed out', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('ErrandFlow');
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('router-outlet')).not.toBeNull();
+    expect(root.textContent).not.toContain('API Identity');
   });
 });

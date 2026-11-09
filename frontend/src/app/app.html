@@ -1,71 +1,23 @@
 <app-header />
 
-@if (auth.isLoading()) {
-  <!-- Loading state -->
-  <main
-    class="flex min-h-[calc(100dvh-5rem)] items-center justify-center p-6"
-  >
-    <p class="text-[var(--ef-text-muted)]">
-      Checking authentication...
-    </p>
-  </main>
-} @else if (!auth.isAuthenticated()) {
-  <!-- Public landing page -->
-  <app-landing-page />
-} @else {
-  <!-- Authenticated content -->
-  <main
-    class="flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center gap-6 p-6"
-  >
-    <h1 class="text-3xl font-bold">ErrandFlow</h1>
-
-    <ng-container *transloco="let t">
-      <h2 class="text-xl text-[var(--ef-primary)]">
-        {{ t('app.welcome') }}
-      </h2>
-    </ng-container>
-
-    @if (auth.error(); as error) {
-      <div class="rounded-lg border border-red-300 bg-red-50 p-4 text-red-800">
-        <h2 class="font-semibold">Authentication error</h2>
-        <p>{{ error }}</p>
-      </div>
-    }
-
-    @if (auth.user(); as user) {
-      <p>
-        Welcome, {{ user.name }}
-      </p>
-    }
-
-    @if (auth.isSynchronizing()) {
-      <p class="text-[var(--ef-text-muted)]">
-        Synchronizing your profile...
-      </p>
-    }
-
-    @if (auth.identity(); as profile) {
-      <div
-        class="w-full max-w-md rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] p-6 shadow-sm"
+<ng-container *transloco="let t">
+  @if (auth.isLoading() || auth.isSynchronizing()) {
+    <main class="flex min-h-[calc(100dvh-5rem)] items-center justify-center p-6" aria-live="polite">
+      <p class="text-[var(--ef-text-muted)]">{{ t('auth.loading') }}</p>
+    </main>
+  } @else if (auth.isAuthenticated() && (auth.error() || !auth.registeredUser())) {
+    <main class="mx-auto flex min-h-[calc(100dvh-5rem)] max-w-lg flex-col items-center justify-center gap-4 px-6 text-center">
+      <h1 class="text-2xl font-bold">{{ t('auth.profileErrorTitle') }}</h1>
+      <p class="text-[var(--ef-text-muted)]" role="alert">{{ t('auth.profileErrorDescription') }}</p>
+      <button
+        type="button"
+        class="min-h-11 rounded-xl bg-[var(--ef-primary)] px-6 py-3 font-semibold text-[var(--ef-on-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)]"
+        (click)="auth.retryProfileSynchronization()"
       >
-        <h2 class="mb-4 text-lg font-bold">
-          API Identity
-        </h2>
-
-        <div class="space-y-3 text-sm text-[var(--ef-text-muted)]">
-          <p>
-            <span class="font-semibold">Registered:</span>
-            {{ profile.isRegistered ? 'Yes' : 'No' }}
-          </p>
-
-          <p class="break-all">
-            <span class="font-semibold">Local user ID:</span>
-            {{ profile.localUserId ?? 'Not registered yet' }}
-          </p>
-        </div>
-      </div>
-    }
-  </main>
-}
-
-<router-outlet />
+        {{ t('common.retry') }}
+      </button>
+    </main>
+  } @else {
+    <router-outlet />
+  }
+</ng-container>

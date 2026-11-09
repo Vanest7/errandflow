@@ -5,14 +5,17 @@
   },
   "common": {
     "save": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "retry": "Reintentar"
   },
   "auth": {
     "signIn": "Iniciar sesión",
     "signOut": "Cerrar sesión",
     "loading": "Comprobando sesión...",
     "signInShort": "Entrar",
-    "signOutShort": "Salir"
+    "signOutShort": "Salir",
+    "profileErrorTitle": "No se ha podido cargar tu perfil",
+    "profileErrorDescription": "No podemos acceder a tus planes hasta que se sincronice tu perfil. Comprueba la conexión e inténtalo de nuevo."
   },
   "forms": {
     "errors": {
@@ -46,6 +49,63 @@
       "planDate": "Fecha",
       "departureTime": "Hora de salida",
       "timeZone": "Zona horaria del plan"
+    },
+    "home": {
+      "title": "Mis planes",
+      "description": "Organiza tus recados y prepara tus recorridos sin dar vueltas de más.",
+      "loading": "Cargando tus planes...",
+      "loadError": "No hemos podido cargar tus planes. Inténtalo de nuevo.",
+      "newPlan": "Nuevo plan",
+      "firstPlan": "Crear mi primer plan",
+      "savedPlans": "Planes guardados",
+      "openPlan": "Abrir plan",
+      "emptyTitle": "Empieza organizando tu primer plan",
+      "emptyDescription": "Elige un nombre, una fecha y una hora de salida. Después podrás añadir tus recados y visualizarlos en el mapa.",
+      "saveError": "No se ha podido guardar el plan. Revisa la conexión e inténtalo de nuevo."
+    },
+    "editor": {
+      "back": "Volver a mis planes",
+      "loading": "Cargando plan...",
+      "loadError": "No se ha podido cargar el plan.",
+      "notFound": "No encontramos este plan.",
+      "departure": "Salida",
+      "draft": "Plan en preparación",
+      "errands": "Mis recados",
+      "origin": "Punto de partida",
+      "destination": "Destino final",
+      "locationConfigured": "Ubicación seleccionada",
+      "locationPending": "Ubicación por definir",
+      "noErrandsTitle": "Todavía no hay recados",
+      "noErrandsDescription": "Pulsa Añadir recado para empezar a organizar tus paradas.",
+      "duration": "{{minutes}} minutos",
+      "map": "Mapa",
+      "mapPlaceholderTitle": "Aquí verás tus paradas",
+      "mapPlaceholderDescription": "Próximamente podrás visualizar las ubicaciones de tus recados en un mapa interactivo.",
+      "addErrand": "Añadir recado",
+      "saveError": "No se ha podido guardar el recado. Inténtalo de nuevo.",
+      "revisionConflict": "El plan ha cambiado desde que lo abriste. Recárgalo antes de continuar.",
+      "reloadPlan": "Recargar plan"
+  },
+    "errandForm": {
+      "title": "Nuevo recado",
+      "errandTitle": "¿Qué necesitas hacer?",
+      "duration": "Duración estimada (minutos)",
+      "invalidDuration": "Introduce una duración válida entre 1 y 65535 minutos",
+      "place": "¿Dónde necesitas ir?",
+      "searchHint": "Busca un establecimiento por su nombre o introduce una dirección y localidad.",
+      "placeholder": "Ej. Farmacia Gran Vía Valencia",
+      "search": "Buscar",
+      "searching": "Buscando establecimientos...",
+      "results": "Establecimientos encontrados",
+      "noResults": "No se han encontrado ubicaciones. Prueba con otra búsqueda.",
+      "add": "Añadir recado",
+      "saving": "Guardando...",
+      "errors": {
+        "short": "Introduce al menos 3 caracteres.",
+        "specific": "No se puede realizar esta búsqueda. Prueba con un nombre o dirección más específicos y una localidad.",
+        "rateLimit": "Se ha alcanzado el límite de búsquedas. Inténtalo más tarde.",
+        "unavailable": "No se ha podido buscar. Comprueba la conexión e inténtalo de nuevo."
+      }
     }
   }
 }

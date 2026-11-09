@@ -1,0 +1,21 @@
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { PlansService } from '../../../core/api/generated';
+import type { PlanDto, PlanInput, PlanSummaryDto } from '../../../core/api/generated';
+
+@Injectable({ providedIn: 'root' })
+export class PlansApiService {
+  private readonly api = inject(PlansService);
+
+  list(): Observable<PlanSummaryDto[]> {
+    return this.api.apiPlansGet$Json();
+  }
+
+  getById(planId: string): Observable<PlanDto> {
+    return this.api.getPlanById$Json({ planId });
+  }
+
+  create(input: PlanInput): Observable<PlanDto> {
+    return this.api.apiPlansPost$Json({ body: input });
+  }
+}

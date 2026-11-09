@@ -5,14 +5,17 @@
   },
   "common": {
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "retry": "Try again"
   },
   "auth": {
     "signIn": "Sign in",
     "signOut": "Sign out",
     "loading": "Checking session...",
     "signInShort": "Log in",
-    "signOutShort": "Log out"
+    "signOutShort": "Log out",
+    "profileErrorTitle": "Your profile could not be loaded",
+    "profileErrorDescription": "We cannot access your plans until your profile is synchronized. Check your connection and try again."
   },
   "forms": {
     "errors": {
@@ -46,6 +49,63 @@
       "planDate": "Date",
       "departureTime": "Departure time",
       "timeZone": "Plan time zone"
+    },
+    "home": {
+      "title": "My plans",
+      "description": "Organize your errands and plan routes without unnecessary detours.",
+      "loading": "Loading your plans...",
+      "loadError": "We could not load your plans. Please try again.",
+      "newPlan": "New plan",
+      "firstPlan": "Create my first plan",
+      "savedPlans": "Saved plans",
+      "openPlan": "Open plan",
+      "emptyTitle": "Start with your first plan",
+      "emptyDescription": "Choose a name, date and departure time. You will then be able to add your errands and view them on the map.",
+      "saveError": "We could not save your plan. Check your connection and try again."
+    },
+    "editor": {
+      "back": "Back to my plans",
+      "loading": "Loading plan...",
+      "loadError": "We could not load the plan.",
+      "notFound": "This plan could not be found.",
+      "departure": "Departure",
+      "draft": "Plan in progress",
+      "errands": "My errands",
+      "origin": "Starting point",
+      "destination": "Final destination",
+      "locationConfigured": "Location selected",
+      "locationPending": "Location not selected",
+      "noErrandsTitle": "No errands yet",
+      "noErrandsDescription": "Select Add errand to start organizing your stops.",
+      "duration": "{{minutes}} minutes",
+      "map": "Map",
+      "mapPlaceholderTitle": "Your stops will appear here",
+      "mapPlaceholderDescription": "You will soon be able to view your errand locations on an interactive map.",
+      "addErrand": "Add errand",
+      "saveError": "Unable to save the errand. Please try again.",
+      "revisionConflict": "This plan has changed since you opened it. Reload it before continuing.",
+      "reloadPlan": "Reload plan"
+    }
+  },
+  "errandForm": {
+    "title": "New errand",
+    "errandTitle": "What do you need to do?",
+    "duration": "Estimated duration (minutes)",
+    "invalidDuration": "Enter a valid duration between 1 and 65535 minutes",
+    "place": "Where do you need to go?",
+    "searchHint": "Search for a place by name or enter an address and city.",
+    "placeholder": "E.g. Pharmacy Gran Via Valencia",
+    "search": "Search",
+    "searching": "Searching for places...",
+    "results": "Places found",
+    "noResults": "No places found. Try another search.",
+    "add": "Add errand",
+    "saving": "Saving...",
+    "errors": {
+      "short": "Enter at least 3 characters.",
+      "specific": "This search cannot be completed. Try a more specific name or address and city.",
+      "rateLimit": "Search limit reached. Please try again later.",
+      "unavailable": "Unable to search. Check your connection and try again."
     }
   }
 }
