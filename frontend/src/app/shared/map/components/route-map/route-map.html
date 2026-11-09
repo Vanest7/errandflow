@@ -1,0 +1,83 @@
+<div *transloco="let t" class="relative w-full overflow-hidden">
+  <span
+    #accentSample
+    class="sr-only text-[var(--ef-accent)]"
+    aria-hidden="true"
+  ></span>
+
+  <span
+    #primarySample
+    class="sr-only text-[var(--ef-primary)]"
+    aria-hidden="true"
+  ></span>
+
+  <!-- Interactive map -->
+  <div
+    #mapElement
+    role="region"
+    tabindex="0"
+    [attr.aria-label]="t('plans.editor.map')"
+    class="h-[360px] w-full sm:h-[480px] xl:h-[600px]"
+  ></div>
+
+  <!-- Map selection instructions -->
+  @if (picking()) {
+    <div
+      class="pointer-events-none absolute inset-x-4 top-4 z-10 rounded-xl border border-[var(--ef-primary)] bg-[var(--ef-surface)] p-4 text-center shadow-sm"
+      aria-live="polite"
+    >
+      <p class="font-semibold text-[var(--ef-primary)]">
+        {{ t('plans.map.choosePoint') }}
+      </p>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (stops().length === 0 && !picking() && !draftPoint()) {
+    <div
+      class="pointer-events-none absolute inset-x-14 top-4 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] p-4 text-center shadow-sm"
+    >
+      <p class="text-sm text-[var(--ef-text-muted)]">
+        {{ t('plans.map.empty') }}
+      </p>
+    </div>
+  }
+
+  <!-- Selected existing stop -->
+  @if (selectedStop(); as stop) {
+    <div
+      class="absolute right-4 top-4 z-10 w-[min(260px,calc(100%-4rem))] rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] p-4 shadow-lg"
+      aria-live="polite"
+    >
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <span class="text-sm font-semibold text-[var(--ef-accent)]">
+            {{ t('plans.map.stop') }} {{ stop.position }}
+          </span>
+
+          <h3 class="mt-2 break-words font-semibold">
+            {{ stop.title }}
+          </h3>
+
+          <p class="mt-2 break-words text-sm text-[var(--ef-text-muted)]">
+            {{ stop.locationLabel }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--ef-text-muted)] hover:bg-[var(--ef-surface-raised)]"
+          [attr.aria-label]="t('plans.map.close')"
+          (click)="selectedStop.set(null)"
+        >
+          <span
+            class="material-symbols-outlined text-xl"
+            aria-hidden="true"
+          >
+            close
+          </span>
+        </button>
+      </div>
+    </div>
+  }
+</div>

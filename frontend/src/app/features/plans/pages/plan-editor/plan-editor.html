@@ -202,11 +202,18 @@
 
         <!-- Create errand -->
         @if (creatingErrand()) {
-          <app-errand-form
-            [saving]="savingErrand()"
-            (submitted)="saveErrand($event)"
-            (cancelled)="cancelAddingErrand()"
-          />
+          <div #formPanel>
+            <app-errand-form
+              [saving]="savingErrand()"
+              [pickingOnMap]="pickingOnMap()"
+              [(mapPoint)]="mapPoint"
+              (pickOnMap)="beginMapPick()"
+              (stopPicking)="stopMapPick()"
+              (areaSelected)="onAreaSelected($event)"
+              (submitted)="saveErrand($event)"
+              (cancelled)="cancelAddingErrand()"
+            />
+          </div>
         } @else {
           <button
             type="button"
@@ -274,44 +281,29 @@
 
       </section>
 
-      <!-- Map panel -->
-      <section
-        class="overflow-hidden rounded-[var(--ef-radius-card)] border border-[var(--ef-border)] bg-[var(--ef-surface)]"
-        aria-labelledby="map-heading"
-      >
-        <div class="border-b border-[var(--ef-border)] px-6 py-5">
-          <h2
-            id="map-heading"
-            class="text-xl font-semibold"
-          >
-            {{ t('plans.editor.map') }}
-          </h2>
-        </div>
-
-        <!-- Map placeholder -->
-        <div
-          class="flex min-h-[360px] flex-col items-center justify-center gap-4 bg-[var(--ef-surface-raised)] px-6 py-12 text-center sm:min-h-[480px]"
+    <!-- Map panel -->
+    <section
+      #mapPanel
+      class="overflow-hidden rounded-[var(--ef-radius-card)] border border-[var(--ef-border)] bg-[var(--ef-surface)]"
+      aria-labelledby="map-heading"
+    >
+      <div class="border-b border-[var(--ef-border)] px-6 py-5">
+        <h2
+          id="map-heading"
+          class="text-xl font-semibold"
         >
-          <div
-            class="flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--ef-surface)] text-[var(--ef-primary)]"
-          >
-            <span
-              class="material-symbols-outlined text-5xl"
-              aria-hidden="true"
-            >
-              map
-            </span>
-          </div>
+          {{ t('plans.editor.map') }}
+        </h2>
+      </div>
 
-          <h3 class="text-xl font-semibold">
-            {{ t('plans.editor.mapPlaceholderTitle') }}
-          </h3>
-
-          <p class="max-w-sm text-[var(--ef-text-muted)]">
-            {{ t('plans.editor.mapPlaceholderDescription') }}
-          </p>
-        </div>
-      </section>
+      <app-route-map
+        [stops]="mapStops()"
+        [picking]="pickingOnMap()"
+        [draftPoint]="mapPoint()"
+        [focusPoint]="areaCenter()"
+        (pointPicked)="onMapPointPicked($event)"
+      />
+    </section>
 
     </div>
   }

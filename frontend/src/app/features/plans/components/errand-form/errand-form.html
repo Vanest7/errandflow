@@ -55,6 +55,120 @@
     }
   </div>
 
+  <!-- Search area -->
+  <div>
+    <label
+      for="errand-area"
+      class="mb-2 block text-sm font-semibold"
+    >
+      {{ t('plans.errandForm.area') }}
+    </label>
+
+    <p class="mb-3 text-sm text-[var(--ef-text-muted)]">
+      {{ t('plans.errandForm.areaHint') }}
+    </p>
+
+    <div class="flex flex-col gap-2 sm:flex-row">
+      <input
+        id="errand-area"
+        [formControl]="areaQuery"
+        type="search"
+        maxlength="150"
+        [placeholder]="t('plans.errandForm.areaPlaceholder')"
+        class="min-w-0 flex-1 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] px-3 py-3 text-[var(--ef-text)] focus-visible:outline-2 focus-visible:outline-[var(--ef-primary)]"
+      />
+
+      <button
+        type="button"
+        class="min-h-11 rounded-xl border border-[var(--ef-primary)] px-4 font-semibold text-[var(--ef-primary)] disabled:opacity-50"
+        [disabled]="searchingArea() || searching() || saving()"
+        (click)="searchAreas()"
+      >
+        {{ t('plans.errandForm.searchArea') }}
+      </button>
+    </div>
+
+    @if (searchingArea()) {
+      <p
+        class="mt-3 text-sm text-[var(--ef-text-muted)]"
+        aria-live="polite"
+      >
+        {{ t('plans.errandForm.searchingArea') }}
+      </p>
+    }
+
+    @if (areaError(); as error) {
+      <p
+        class="mt-3 text-sm text-[var(--mat-sys-error)]"
+        role="alert"
+      >
+        {{ t('plans.errandForm.errors.' + error) }}
+      </p>
+    }
+
+    @if (areaSearched() && areaResults().length === 0) {
+      <p class="mt-3 text-sm text-[var(--ef-text-muted)]">
+        {{ t('plans.errandForm.noAreaResults') }}
+      </p>
+    }
+
+    @if (areaResults().length > 0) {
+      <ul
+        class="mt-3 space-y-2"
+        [attr.aria-label]="t('plans.errandForm.areaResults')"
+      >
+        @for (area of areaResults(); track $index) {
+          <li>
+            <button
+              type="button"
+              [attr.aria-pressed]="selectedArea() === area"
+              class="w-full rounded-xl border bg-[var(--ef-surface)] p-3 text-left focus-visible:outline-2 focus-visible:outline-[var(--ef-primary)]"
+              [style.border-color]="
+              selectedArea() === area
+                ? 'var(--ef-primary)'
+                : 'var(--ef-border)'
+            "
+              (click)="selectArea(area)"
+            >
+            <span class="block font-semibold">
+              {{ area.label }}
+            </span>
+
+              @if (area.address) {
+                <span
+                  class="mt-1 block text-sm text-[var(--ef-text-muted)]"
+                >
+                {{ area.address }}
+              </span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (selectedArea(); as area) {
+      <p
+        class="mt-3 flex items-center gap-2 text-sm font-semibold text-[var(--ef-primary)]"
+        aria-live="polite"
+      >
+      <span
+        class="material-symbols-outlined text-lg"
+        aria-hidden="true"
+      >
+        check_circle
+      </span>
+
+        {{ t('plans.errandForm.selectedArea') }}:
+        {{ area.label }}
+      </p>
+    }
+
+    <p class="mt-3 text-xs text-[var(--ef-text-muted)]">
+      © OpenStreetMap contributors
+    </p>
+  </div>
+
   <!-- Place search -->
   <div>
     <label for="errand-place" class="mb-2 block text-sm font-semibold">
@@ -78,12 +192,18 @@
       <button
         type="button"
         class="min-h-11 rounded-xl border border-[var(--ef-primary)] px-4 font-semibold text-[var(--ef-primary)] disabled:opacity-50"
-        [disabled]="searching() || saving()"
+        [disabled]="!selectedArea() || searching() || searchingArea() || saving()"
         (click)="searchPlaces()"
       >
         {{ t('plans.errandForm.search') }}
       </button>
     </div>
+
+    @if (!selectedArea()) {
+      <p class="mt-2 text-sm text-[var(--ef-text-muted)]">
+        {{ t('plans.errandForm.selectAreaFirst') }}
+      </p>
+    }
 
     @if (searching()) {
       <p class="mt-3 text-sm text-[var(--ef-text-muted)]" aria-live="polite">
@@ -102,6 +222,84 @@
         {{ t('plans.errandForm.noResults') }}
       </p>
     }
+
+    <!-- Manual map selection -->
+    <div class="mt-5 border-t border-[var(--ef-border)] pt-5">
+      <p class="mb-3 text-sm text-[var(--ef-text-muted)]">
+        {{ t('plans.errandForm.mapPickHelp') }}
+      </p>
+
+      <button
+        type="button"
+        class="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--ef-primary)] px-4 py-3 font-semibold text-[var(--ef-primary)] transition-colors hover:bg-[var(--ef-surface)] disabled:opacity-50"
+        [disabled]="saving()"
+        (click)="chooseOnMap()"
+      >
+    <span
+      class="material-symbols-outlined"
+      aria-hidden="true"
+    >
+      location_on
+    </span>
+
+        {{
+          pickingOnMap()
+            ? t('plans.errandForm.pickingOnMap')
+            : t('plans.errandForm.chooseOnMap')
+        }}
+      </button>
+
+      @if (mapPoint(); as point) {
+        <div
+          class="mt-4 rounded-xl border border-[var(--ef-primary)] bg-[var(--ef-surface)] p-4"
+        >
+          <p class="mb-4 flex items-center gap-2 font-semibold text-[var(--ef-primary)]">
+        <span
+          class="material-symbols-outlined"
+          aria-hidden="true"
+        >
+          check_circle
+        </span>
+
+            {{ t('plans.errandForm.mapPointSelected') }}
+          </p>
+
+          <label
+            for="manual-location-label"
+            class="mb-2 block text-sm font-semibold"
+          >
+            {{ t('plans.errandForm.manualLocationName') }}
+          </label>
+
+          <input
+            id="manual-location-label"
+            type="text"
+            maxlength="150"
+            [formControl]="locationLabelControl"
+            [placeholder]="t('plans.errandForm.manualLocationPlaceholder')"
+            class="w-full rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] px-3 py-3 text-[var(--ef-text)] focus-visible:outline-2 focus-visible:outline-[var(--ef-primary)]"
+          />
+
+          @if (
+            locationLabelControl.touched &&
+            locationLabelControl.invalid
+            ) {
+            <p
+              class="mt-2 text-sm text-[var(--mat-sys-error)]"
+              role="alert"
+            >
+              {{ t('forms.errors.required') }}
+            </p>
+          }
+
+          <p class="mt-3 text-xs text-[var(--ef-text-muted)]">
+            {{ t('plans.errandForm.coordinates') }}:
+            {{ point.latitude.toFixed(6) }},
+            {{ point.longitude.toFixed(6) }}
+          </p>
+        </div>
+      }
+    </div>
 
     <!-- Search results -->
     @if (results().length > 0) {
@@ -164,7 +362,10 @@
     <button
       type="submit"
       class="min-h-11 rounded-xl bg-[var(--ef-primary)] px-5 font-semibold text-[var(--ef-on-primary)] disabled:opacity-50"
-      [disabled]="saving() || !selectedPlace()"
+      [disabled]="
+  saving() ||
+  (!selectedPlace() && (!mapPoint() || locationLabelControl.invalid))
+"
     >
       {{
         saving()

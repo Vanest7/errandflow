@@ -50,6 +50,12 @@
       "departureTime": "Hora de salida",
       "timeZone": "Zona horaria del plan"
     },
+    "map": {
+      "empty": "Añade tu primer recado para visualizar sus ubicaciones.",
+      "stop": "Parada",
+      "close": "Cerrar información de la parada",
+      "choosePoint": "Haz clic en el mapa para colocar el pin del recado."
+    },
     "home": {
       "title": "Mis planes",
       "description": "Organiza tus recados y prepara tus recorridos sin dar vueltas de más.",
@@ -85,7 +91,7 @@
       "saveError": "No se ha podido guardar el recado. Inténtalo de nuevo.",
       "revisionConflict": "El plan ha cambiado desde que lo abriste. Recárgalo antes de continuar.",
       "reloadPlan": "Recargar plan"
-  },
+    },
     "errandForm": {
       "title": "Nuevo recado",
       "errandTitle": "¿Qué necesitas hacer?",
@@ -100,6 +106,22 @@
       "noResults": "No se han encontrado ubicaciones. Prueba con otra búsqueda.",
       "add": "Añadir recado",
       "saving": "Guardando...",
+      "area": "¿En qué zona quieres buscar?",
+      "areaHint": "Introduce una ciudad, localidad o dirección para encontrar establecimientos cercanos.",
+      "areaPlaceholder": "Ej. Valencia, España",
+      "searchArea": "Buscar zona",
+      "searchingArea": "Buscando ubicaciones...",
+      "areaResults": "Zonas encontradas",
+      "noAreaResults": "No se han encontrado ubicaciones para esta zona.",
+      "selectedArea": "Zona seleccionada",
+      "selectAreaFirst": "Selecciona primero una zona de búsqueda.",
+      "chooseOnMap": "Elegir en el mapa",
+      "pickingOnMap": "Seleccionando en el mapa...",
+      "mapPickHelp": "¿No encuentras el establecimiento? Puedes marcar su ubicación directamente en el mapa.",
+      "mapPointSelected": "Ubicación seleccionada en el mapa",
+      "manualLocationName": "Nombre del lugar",
+      "manualLocationPlaceholder": "Ej. Correos Mislata",
+      "coordinates": "Coordenadas",
       "errors": {
         "short": "Introduce al menos 3 caracteres.",
         "specific": "No se puede realizar esta búsqueda. Prueba con un nombre o dirección más específicos y una localidad.",

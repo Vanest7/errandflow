@@ -1,5 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
@@ -28,13 +36,27 @@ import { ErrandsApiService } from '../../data-access/errands-api.service';
 import { PlansApiService } from '../../data-access/plans-api.service';
 import { formatPlanDate } from '../../utils/format-plan-date';
 import {LocationsApiService} from '../../data-access/location-api.service';
+import {RouteMap} from '../../../../shared/map/components/route-map/route-map';
+import {MapStop} from '../../../../shared/map/models/map-stop.model';
+import {MapCoordinates} from "../../../../shared/map/models/map-coordinates";
 
 @Component({
   selector: 'app-plan-editor',
-  imports: [RouterLink, TranslocoDirective, ErrandForm],
+  imports: [RouterLink, TranslocoDirective, ErrandForm, RouteMap],
   templateUrl: './plan-editor.html',
 })
 export class PlanEditor {
+  @ViewChild('mapPanel')
+  private mapPanel?: ElementRef<HTMLElement>;
+
+  @ViewChild('formPanel')
+  private formPanel?: ElementRef<HTMLElement>;
+
+  protected readonly pickingOnMap = signal(false);
+
+  protected readonly mapPoint = signal<MapCoordinates | null>(null);
+
+  protected readonly areaCenter = signal<MapCoordinates | null>(null);
   private readonly route = inject(ActivatedRoute);
   private readonly plansApi = inject(PlansApiService);
   private readonly errandsApi = inject(ErrandsApiService);
@@ -52,6 +74,29 @@ export class PlanEditor {
   protected readonly locationById = computed(
     () => new Map(this.locations().map((location) => [location.id, location])),
   );
+
+  protected readonly mapStops = computed<MapStop[]>(() => {
+    const locations = this.locationById();
+
+    return this.errands().flatMap((errand, index) => {
+      const location = locations.get(errand.locationId);
+
+      if (!location) {
+        return [];
+      }
+
+      return [
+        {
+          id: errand.id,
+          title: errand.title,
+          locationLabel: location.label,
+          latitude: Number(location.latitude),
+          longitude: Number(location.longitude),
+          position: index + 1,
+        },
+      ];
+    });
+  });
 
   protected readonly loading = signal(true);
   protected readonly loadError = signal(false);
@@ -115,12 +160,16 @@ export class PlanEditor {
 
   protected startAddingErrand(): void {
     this.createError.set(null);
+    this.mapPoint.set(null);
+    this.pickingOnMap.set(false);
     this.creatingErrand.set(true);
   }
 
   protected cancelAddingErrand(): void {
     this.creatingErrand.set(false);
     this.createError.set(null);
+    this.mapPoint.set(null);
+    this.pickingOnMap.set(false);
   }
 
   protected saveErrand(value: NewErrandValue): void {
@@ -147,6 +196,8 @@ export class PlanEditor {
       .subscribe({
         next: () => {
           this.creatingErrand.set(false);
+          this.pickingOnMap.set(false);
+          this.mapPoint.set(null);
           this.refresh$.next();
         },
 
@@ -160,5 +211,35 @@ export class PlanEditor {
 
   protected displayDate(value: string): string {
     return formatPlanDate(value, this.language.activeLanguage() as SupportedLanguage);
+  }
+  protected beginMapPick(): void {
+    this.pickingOnMap.set(true);
+
+    requestAnimationFrame(() => {
+      this.mapPanel?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    });
+  }
+
+  protected stopMapPick(): void {
+    this.pickingOnMap.set(false);
+  }
+
+  protected onAreaSelected(point: MapCoordinates): void {
+    this.areaCenter.set(point);
+  }
+
+  protected onMapPointPicked(point: MapCoordinates): void {
+    this.mapPoint.set(point);
+    this.pickingOnMap.set(false);
+
+    requestAnimationFrame(() => {
+      this.formPanel?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
   }
 }

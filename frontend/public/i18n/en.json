@@ -50,6 +50,12 @@
       "departureTime": "Departure time",
       "timeZone": "Plan time zone"
     },
+    "map": {
+      "empty": "Add your first errand to view its location on the map.",
+      "stop": "Stop",
+      "close": "Close stop details",
+      "choosePoint": "Click on the map to place the errand marker."
+    },
     "home": {
       "title": "My plans",
       "description": "Organize your errands and plan routes without unnecessary detours.",
@@ -85,27 +91,43 @@
       "saveError": "Unable to save the errand. Please try again.",
       "revisionConflict": "This plan has changed since you opened it. Reload it before continuing.",
       "reloadPlan": "Reload plan"
-    }
-  },
-  "errandForm": {
-    "title": "New errand",
-    "errandTitle": "What do you need to do?",
-    "duration": "Estimated duration (minutes)",
-    "invalidDuration": "Enter a valid duration between 1 and 65535 minutes",
-    "place": "Where do you need to go?",
-    "searchHint": "Search for a place by name or enter an address and city.",
-    "placeholder": "E.g. Pharmacy Gran Via Valencia",
-    "search": "Search",
-    "searching": "Searching for places...",
-    "results": "Places found",
-    "noResults": "No places found. Try another search.",
-    "add": "Add errand",
-    "saving": "Saving...",
-    "errors": {
-      "short": "Enter at least 3 characters.",
-      "specific": "This search cannot be completed. Try a more specific name or address and city.",
-      "rateLimit": "Search limit reached. Please try again later.",
-      "unavailable": "Unable to search. Check your connection and try again."
+    },
+    "errandForm": {
+      "title": "New errand",
+      "errandTitle": "What do you need to do?",
+      "duration": "Estimated duration (minutes)",
+      "invalidDuration": "Enter a valid duration between 1 and 65535 minutes",
+      "place": "Where do you need to go?",
+      "searchHint": "Search for a place by name or enter an address and city.",
+      "placeholder": "E.g. Pharmacy Gran Via Valencia",
+      "search": "Search",
+      "searching": "Searching for places...",
+      "results": "Places found",
+      "noResults": "No places found. Try another search.",
+      "add": "Add errand",
+      "saving": "Saving...",
+      "area": "Where would you like to search?",
+      "areaHint": "Enter a city, town or address to find nearby places.",
+      "areaPlaceholder": "E.g. Valencia, Spain",
+      "searchArea": "Find area",
+      "searchingArea": "Searching for locations...",
+      "areaResults": "Areas found",
+      "noAreaResults": "No matching areas were found.",
+      "selectedArea": "Selected area",
+      "selectAreaFirst": "Select a search area first.",
+      "chooseOnMap": "Choose on map",
+      "pickingOnMap": "Selecting on map...",
+      "mapPickHelp": "Can't find the place? You can mark its location directly on the map.",
+      "mapPointSelected": "Location selected on map",
+      "manualLocationName": "Place name",
+      "manualLocationPlaceholder": "E.g. Mislata Post Office",
+      "coordinates": "Coordinates",
+      "errors": {
+        "short": "Enter at least 3 characters.",
+        "specific": "This search cannot be completed. Try a more specific name or address and city.",
+        "rateLimit": "Search limit reached. Please try again later.",
+        "unavailable": "Unable to search. Check your connection and try again."
+      }
     }
   }
 }
