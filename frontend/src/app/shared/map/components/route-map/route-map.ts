@@ -18,6 +18,7 @@ import OlMap from 'ol/Map.js';
 import View from 'ol/View.js';
 
 import { defaults as defaultControls } from 'ol/control/defaults.js';
+import LineString from 'ol/geom/LineString.js';
 import Point from 'ol/geom/Point.js';
 import TileLayer from 'ol/layer/Tile.js';
 import VectorLayer from 'ol/layer/Vector.js';
@@ -31,7 +32,6 @@ import { ThemeService } from '../../../../core/theme/theme.service';
 
 import type { MapStop } from '../../models/map-stop.model';
 import type { MapCoordinates } from '../../models/map-coordinates';
-import {LineString} from "ol/geom";
 
 @Component({
   selector: 'app-route-map',
@@ -123,12 +123,13 @@ export class RouteMap implements AfterViewInit, OnDestroy {
         this.updateRouteStyles();
         this.renderDraftPoint(this.draftPoint());
       });
-      effect(() => {
-        const legs = this.routeLegs();
+    });
 
-        untracked(() => {
-          this.renderRouteLegs(legs);
-        });
+    effect(() => {
+      const legs = this.routeLegs();
+
+      untracked(() => {
+        this.renderRouteLegs(legs);
       });
     });
   }
@@ -267,9 +268,11 @@ export class RouteMap implements AfterViewInit, OnDestroy {
 
     this.map.updateSize();
 
-    const extent = this.markerSource.getExtent();
+    const extent = this.routeSource.isEmpty()
+      ? this.markerSource.getExtent()
+      : this.routeSource.getExtent();
 
-    if (!extent) {
+    if (extent === null) {
       return;
     }
 

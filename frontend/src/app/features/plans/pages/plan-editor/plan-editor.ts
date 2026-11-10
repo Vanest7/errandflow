@@ -37,7 +37,7 @@ import { LanguageService } from '../../../../i18n/language.service';
 import type { SupportedLanguage } from '../../../../i18n/language.service';
 
 import { ErrandForm } from '../../components/errand-form/errand-form';
-import type { NewErrandValue } from '../../components/errand-form/errand-form';
+import type { NewErrandValue, UpdatedErrandValue } from '../../components/errand-form/errand-form';
 
 import {
   PlanEndpointPicker,
@@ -56,6 +56,7 @@ import type { MapCoordinates } from '../../../../shared/map/models/map-coordinat
 import type { MapStop } from '../../../../shared/map/models/map-stop.model';
 import { PlanRouteApiService } from '../../data-access/plan-route-api.service';
 import { mapRoutePath } from '../../utils/map-route-path';
+import { moveErrandIds } from '../../utils/reorder-errands';
 
 type MapPickTarget = 'errand' | EndpointKind;
 type EndpointError = 'conflict' | 'generic' | 'notAssigned';
@@ -111,6 +112,26 @@ export class PlanEditor {
   protected readonly creatingErrand = signal(false);
   protected readonly savingErrand = signal(false);
   protected readonly createError = signal<'conflict' | 'generic' | null>(null);
+
+  protected readonly editingErrandId = signal<string | null>(null);
+  protected readonly savingEditedErrand = signal(false);
+  protected readonly confirmingDeleteId = signal<string | null>(null);
+  protected readonly deletingErrandId = signal<string | null>(null);
+  protected readonly reorderingErrands = signal(false);
+  protected readonly errandMutationError = signal<'conflict' | 'notFound' | 'generic' | null>(null);
+
+  protected readonly errandMutationBusy = computed(() =>
+    this.savingErrand() ||
+    this.savingEditedErrand() ||
+    this.deletingErrandId() !== null ||
+    this.reorderingErrands(),
+  );
+
+  protected readonly originalOrderErrands = computed(() =>
+    [...this.errands()].sort(
+      (a, b) => Number(a.originalPosition) - Number(b.originalPosition),
+    ),
+  );
 
   protected readonly editingEndpoint = signal<EndpointKind | null>(null);
   protected readonly savingEndpoint = signal(false);
@@ -228,6 +249,10 @@ export class PlanEditor {
           this.locations.set([]);
 
           this.resetEndpointEditor();
+          this.editingErrandId.set(null);
+          this.confirmingDeleteId.set(null);
+          this.errandMutationError.set(null);
+          this.mapPoint.set(null);
 
           if (!planId) {
             this.notFound.set(true);
@@ -269,6 +294,9 @@ export class PlanEditor {
 
   protected retry(): void {
     this.resetEndpointEditor();
+    this.cancelEditingErrand();
+    this.confirmingDeleteId.set(null);
+    this.errandMutationError.set(null);
     this.refresh$.next();
   }
 
@@ -277,7 +305,11 @@ export class PlanEditor {
   }
 
   protected startAddingErrand(): void {
-    if (this.savingEndpoint()) {
+    if (
+      this.savingEndpoint() || this.errandMutationBusy() ||
+      this.editingErrandId() !== null || this.confirmingDeleteId() !== null ||
+      this.editingEndpoint() !== null
+    ) {
       return;
     }
 
@@ -299,7 +331,7 @@ export class PlanEditor {
   protected saveErrand(value: NewErrandValue): void {
     const currentPlan = this.plan();
 
-    if (!currentPlan || this.savingErrand() || this.savingEndpoint()) {
+    if (!currentPlan || this.errandMutationBusy() || this.savingEndpoint()) {
       return;
     }
     this.invalidateRoute();
@@ -333,7 +365,11 @@ export class PlanEditor {
   }
 
   protected beginEndpointEdit(kind: EndpointKind): void {
-    if (this.creatingErrand() || this.savingErrand() || this.savingEndpoint()) {
+    if (
+      this.creatingErrand() || this.errandMutationBusy() ||
+      this.editingErrandId() !== null || this.confirmingDeleteId() !== null ||
+      this.savingEndpoint()
+    ) {
       return;
     }
 
@@ -354,7 +390,10 @@ export class PlanEditor {
     const currentPlan = this.plan();
     const target = this.editingEndpoint();
 
-    if (!currentPlan || !target || this.savingEndpoint()) {
+    if (
+      !currentPlan || !target || this.savingEndpoint() ||
+      this.errandMutationBusy() || this.editingErrandId() !== null
+    ) {
       return;
     }
     this.invalidateRoute();
@@ -418,6 +457,165 @@ export class PlanEditor {
           this.endpointError.set(this.stagedEndpointLocationId() ? 'notAssigned' : 'generic');
         },
       });
+  }
+
+  protected startEditingErrand(errand: ErrandDto): void {
+    if (
+      this.errandMutationBusy() || this.creatingErrand() ||
+      this.editingEndpoint() !== null || this.savingEndpoint() ||
+      this.errandMutationError() === 'conflict'
+    ) {
+      return;
+    }
+
+    this.editingErrandId.set(errand.id);
+    this.confirmingDeleteId.set(null);
+    this.errandMutationError.set(null);
+    this.mapPoint.set(null);
+    this.mapPickTarget.set(null);
+  }
+
+  protected cancelEditingErrand(): void {
+    if (this.savingEditedErrand()) {
+      return;
+    }
+
+    this.editingErrandId.set(null);
+    this.mapPoint.set(null);
+    if (this.mapPickTarget() === 'errand') {
+      this.mapPickTarget.set(null);
+    }
+  }
+
+  protected updateErrand(value: UpdatedErrandValue): void {
+    const currentPlan = this.plan();
+    const errandId = this.editingErrandId();
+
+    if (!currentPlan || !errandId || this.errandMutationBusy()) {
+      return;
+    }
+
+    const location = value.location.type === 'new'
+      ? { newLocation: value.location.newLocation }
+      : { locationId: value.location.locationId };
+
+    this.invalidateRoute();
+    this.errandMutationError.set(null);
+    this.savingEditedErrand.set(true);
+    this.mapPickTarget.set(null);
+
+    this.errandsApi.update(currentPlan.id, errandId, {
+      title: value.title,
+      durationMinutes: value.durationMinutes,
+      expectedRevision: currentPlan.revision,
+      ...location,
+    })
+      .pipe(
+        finalize(() => this.savingEditedErrand.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.editingErrandId.set(null);
+          this.mapPoint.set(null);
+          this.refresh$.next();
+        },
+        error: (error: unknown) => this.handleErrandMutationError(error),
+      });
+  }
+
+  protected askDeleteErrand(errandId: string): void {
+    if (
+      this.errandMutationBusy() || this.editingErrandId() !== null ||
+      this.creatingErrand() || this.editingEndpoint() !== null ||
+      this.savingEndpoint() || this.errandMutationError() === 'conflict'
+    ) {
+      return;
+    }
+
+    this.errandMutationError.set(null);
+    this.confirmingDeleteId.set(errandId);
+  }
+
+  protected cancelDeleteErrand(): void {
+    if (this.deletingErrandId() !== null) {
+      return;
+    }
+    this.confirmingDeleteId.set(null);
+  }
+
+  protected deleteErrand(errandId: string): void {
+    const currentPlan = this.plan();
+    if (
+      !currentPlan || this.confirmingDeleteId() !== errandId ||
+      this.errandMutationBusy()
+    ) {
+      return;
+    }
+
+    this.invalidateRoute();
+    this.errandMutationError.set(null);
+    this.deletingErrandId.set(errandId);
+
+    this.errandsApi.delete(currentPlan.id, errandId, currentPlan.revision)
+      .pipe(
+        finalize(() => this.deletingErrandId.set(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.confirmingDeleteId.set(null);
+          this.refresh$.next();
+        },
+        error: (error: unknown) => this.handleErrandMutationError(error),
+      });
+  }
+
+  protected moveErrand(errandId: string, direction: -1 | 1): void {
+    const currentPlan = this.plan();
+    if (
+      !currentPlan || this.errandMutationBusy() ||
+      this.editingErrandId() !== null || this.confirmingDeleteId() !== null ||
+      this.creatingErrand() || this.editingEndpoint() !== null ||
+      this.savingEndpoint() || this.errandMutationError() === 'conflict'
+    ) {
+      return;
+    }
+
+    const errandIds = moveErrandIds(this.originalOrderErrands(), errandId, direction);
+    if (!errandIds) {
+      return;
+    }
+
+    this.invalidateRoute();
+    this.errandMutationError.set(null);
+    this.reorderingErrands.set(true);
+
+    this.errandsApi.reorder(currentPlan.id, {
+      expectedRevision: currentPlan.revision,
+      errandIds,
+    })
+      .pipe(
+        finalize(() => this.reorderingErrands.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (result) => {
+          this.errands.set(result.errands);
+          this.plan.update((plan) => plan
+            ? { ...plan, revision: result.planRevision }
+            : plan,
+          );
+        },
+        error: (error: unknown) => this.handleErrandMutationError(error),
+      });
+  }
+
+  private handleErrandMutationError(error: unknown): void {
+    const status = error instanceof HttpErrorResponse ? error.status : 0;
+    this.errandMutationError.set(
+      status === 409 ? 'conflict' : status === 404 ? 'notFound' : 'generic',
+    );
   }
 
   private assignEndpoint(
@@ -521,7 +719,10 @@ export class PlanEditor {
       this.creatingErrand() ||
       this.editingEndpoint() !== null ||
       this.savingErrand() ||
-      this.savingEndpoint()
+      this.savingEndpoint() ||
+      this.editingErrandId() !== null ||
+      this.confirmingDeleteId() !== null ||
+      this.errandMutationBusy()
     ) {
       return;
     }

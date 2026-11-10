@@ -5,7 +5,7 @@
   class="mt-5 space-y-5 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-4"
 >
   <h3 class="text-lg font-semibold">
-    {{ t('plans.errandForm.title') }}
+    {{ errand() ? t('plans.errandForm.editTitle') : t('plans.errandForm.title') }}
   </h3>
 
   <!-- Errand title -->
@@ -54,6 +54,24 @@
       </p>
     }
   </div>
+
+  <!-- Existing location in edit mode -->
+  @if (errand(); as existingErrand) {
+    <div class="rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] p-4">
+      <p class="text-sm font-semibold">
+        {{ t('plans.errandForm.currentLocation') }}
+      </p>
+      <p class="mt-1 break-words text-[var(--ef-text)]">
+        {{ currentLocation()?.label ?? existingErrand.locationId }}
+      </p>
+      <p class="mt-2 text-sm text-[var(--ef-text-muted)]">
+        {{ t('plans.errandForm.keepLocation') }}
+      </p>
+      <p class="mt-1 text-sm text-[var(--ef-text-muted)]">
+        {{ t('plans.errandForm.changeLocation') }}
+      </p>
+    </div>
+  }
 
   <!-- Search area -->
   <div>
@@ -363,14 +381,18 @@
       type="submit"
       class="min-h-11 rounded-xl bg-[var(--ef-primary)] px-5 font-semibold text-[var(--ef-on-primary)] disabled:opacity-50"
       [disabled]="
-  saving() ||
-  (!selectedPlace() && (!mapPoint() || locationLabelControl.invalid))
-"
+        saving() ||
+        searching() ||
+        searchingArea() ||
+        pickingOnMap() ||
+        (!!mapPoint() && locationLabelControl.invalid) ||
+        (!errand() && !selectedPlace() && !mapPoint())
+      "
     >
       {{
         saving()
           ? t('plans.errandForm.saving')
-          : t('plans.errandForm.add')
+          : errand() ? t('plans.errandForm.saveChanges') : t('plans.errandForm.add')
       }}
     </button>
   </div>

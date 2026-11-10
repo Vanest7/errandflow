@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ErrandFlow.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+16242acbc9c95c7ccc75c45de6d93c75cd56647a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1b8b1ed427212b29f19322cd0b3ae00bb57eb3cd")]
 [assembly: System.Reflection.AssemblyProductAttribute("ErrandFlow.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ErrandFlow.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

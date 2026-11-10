@@ -86,3 +86,8 @@ check, backend API build (0 warnings/errors) and generation from a temporary API
 instance. NOT RUN: authenticated browser login/profile flow and live API calls with a
 real token. Next: add the first plans feature page and data-access service; add
 Transloco ES/EN when the related screens are built.
+
+Route map extent typing correction (2026-11-09): guarded the nullable OpenLayers
+VectorSource extent before calling View.fit, resolving the frontend TypeScript build
+failure without changing map behavior. Verified with frontend lint, development build,
+and git diff --check.

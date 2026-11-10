@@ -112,7 +112,7 @@
 
             <button
               type="button"
-              [disabled]="creatingErrand() || savingEndpoint()"
+              [disabled]="creatingErrand() || savingEndpoint() || errandMutationBusy() || editingErrandId() !== null || confirmingDeleteId() !== null"
               (click)="beginEndpointEdit('origin')"
               class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--ef-primary)] disabled:opacity-50"
             >
@@ -147,84 +147,164 @@
 
         <!-- Empty errands state -->
         @if (errands().length === 0) {
-          <div
-            class="my-6 rounded-xl bg-[var(--ef-surface-raised)] p-6 text-center"
-          >
-            <span
-              class="material-symbols-outlined mb-3 text-4xl text-[var(--ef-accent)]"
-              aria-hidden="true"
-            >
+          <div class="my-6 rounded-xl bg-[var(--ef-surface-raised)] p-6 text-center">
+            <span class="material-symbols-outlined mb-3 text-4xl text-[var(--ef-accent)]" aria-hidden="true">
               checklist
             </span>
-
-            <h3 class="font-semibold">
-              {{ t('plans.editor.noErrandsTitle') }}
-            </h3>
-
+            <h3 class="font-semibold">{{ t('plans.editor.noErrandsTitle') }}</h3>
             <p class="mt-2 text-sm text-[var(--ef-text-muted)]">
               {{ t('plans.editor.noErrandsDescription') }}
             </p>
           </div>
         } @else {
-
-          <!-- Errands list -->
+          <!-- Errands in the user's original order -->
           <ol class="my-6 space-y-3">
-            @for (errand of errands(); track errand.id; let index = $index) {
-              <li
-                class="flex items-start gap-4 rounded-xl border border-[var(--ef-border)] p-4"
-              >
-                <!-- Stop number -->
-                <span
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--ef-surface-raised)] font-semibold text-[var(--ef-accent)]"
-                >
-                  {{ index + 1 }}
-                </span>
-
-                <div class="min-w-0">
-                  <!-- Errand title -->
-                  <h3 class="break-words font-semibold">
-                    {{ errand.title }}
-                  </h3>
-
-                  <!-- Location -->
-                  @if (locationById().get(errand.locationId); as location) {
-                    <p
-                      class="mt-2 flex items-start gap-1 text-sm text-[var(--ef-text-muted)]"
-                    >
-                      <span
-                        class="material-symbols-outlined text-base"
-                        aria-hidden="true"
-                      >
-                        location_on
-                      </span>
-
-                      <span class="break-words">
-                        {{ location.label }}
-                      </span>
-                    </p>
-                  }
-
-                  <!-- Duration -->
-                  <p
-                    class="mt-2 flex items-center gap-1 text-sm text-[var(--ef-text-muted)]"
+            @for (errand of originalOrderErrands(); track errand.id; let index = $index) {
+              <li class="rounded-xl border border-[var(--ef-border)] p-4">
+                <div class="flex items-start gap-4">
+                  <span
+                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--ef-surface-raised)] font-semibold text-[var(--ef-accent)]"
                   >
-                    <span
-                      class="material-symbols-outlined text-base"
-                      aria-hidden="true"
-                    >
-                      schedule
-                    </span>
+                    {{ index + 1 }}
+                  </span>
 
-                    {{
-                      t('plans.editor.duration', {
-                        minutes: errand.durationMinutes
-                      })
-                    }}
-                  </p>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="break-words font-semibold">{{ errand.title }}</h3>
+                    @if (locationById().get(errand.locationId); as location) {
+                      <p class="mt-2 flex items-start gap-1 text-sm text-[var(--ef-text-muted)]">
+                        <span class="material-symbols-outlined text-base" aria-hidden="true">location_on</span>
+                        <span class="break-words">{{ location.label }}</span>
+                      </p>
+                    }
+                    <p class="mt-2 flex items-center gap-1 text-sm text-[var(--ef-text-muted)]">
+                      <span class="material-symbols-outlined text-base" aria-hidden="true">schedule</span>
+                      {{ t('plans.editor.duration', { minutes: errand.durationMinutes }) }}
+                    </p>
+                  </div>
                 </div>
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--ef-primary)] disabled:opacity-50"
+                    [disabled]="
+                      errandMutationBusy() || creatingErrand() || editingEndpoint() !== null ||
+                      editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()
+                    "
+                    [attr.aria-label]="t('plans.editor.editErrand') + ': ' + errand.title"
+                    (click)="startEditingErrand(errand)"
+                  >
+                    {{ t('plans.editor.editErrand') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--mat-sys-error)] disabled:opacity-50"
+                    [disabled]="
+                      errandMutationBusy() || creatingErrand() || editingEndpoint() !== null ||
+                      editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()
+                    "
+                    [attr.aria-label]="t('plans.editor.deleteErrand') + ': ' + errand.title"
+                    (click)="askDeleteErrand(errand.id)"
+                  >
+                    {{ t('plans.editor.deleteErrand') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold disabled:opacity-50"
+                    [disabled]="
+                      index === 0 || errandMutationBusy() || creatingErrand() ||
+                      editingEndpoint() !== null || editingErrandId() !== null ||
+                      confirmingDeleteId() !== null || savingEndpoint()
+                    "
+                    [attr.aria-label]="t('plans.editor.moveErrandUp') + ': ' + errand.title"
+                    (click)="moveErrand(errand.id, -1)"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold disabled:opacity-50"
+                    [disabled]="
+                      index === originalOrderErrands().length - 1 || errandMutationBusy() ||
+                      creatingErrand() || editingEndpoint() !== null ||
+                      editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()
+                    "
+                    [attr.aria-label]="t('plans.editor.moveErrandDown') + ': ' + errand.title"
+                    (click)="moveErrand(errand.id, 1)"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_downward</span>
+                  </button>
+                </div>
+
+                @if (editingErrandId() === errand.id) {
+                  <div #formPanel>
+                    <app-errand-form
+                      [errand]="errand"
+                      [currentLocation]="locationById().get(errand.locationId) ?? null"
+                      [saving]="savingEditedErrand()"
+                      [pickingOnMap]="mapPickTarget() === 'errand'"
+                      [(mapPoint)]="mapPoint"
+                      (pickOnMap)="beginMapPick()"
+                      (stopPicking)="stopMapPick()"
+                      (areaSelected)="onAreaSelected($event)"
+                      (updated)="updateErrand($event)"
+                      (cancelled)="cancelEditingErrand()"
+                    />
+                  </div>
+                }
+
+                @if (confirmingDeleteId() === errand.id) {
+                  <div class="mt-4 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-4">
+                    <p class="font-semibold" role="alert">{{ t('plans.editor.deleteConfirm') }}</p>
+                    <p class="mt-1 break-words text-sm text-[var(--ef-text-muted)]">{{ errand.title }}</p>
+                    <div class="mt-4 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        class="min-h-11 rounded-xl border border-[var(--ef-border)] px-4 font-semibold disabled:opacity-50"
+                        [disabled]="deletingErrandId() !== null"
+                        (click)="cancelDeleteErrand()"
+                      >
+                        {{ t('plans.editor.cancelDelete') }}
+                      </button>
+                      <button
+                        type="button"
+                        class="min-h-11 rounded-xl bg-[var(--ef-primary)] px-4 font-semibold text-[var(--ef-on-primary)] disabled:opacity-50"
+                        [disabled]="deletingErrandId() !== null"
+                        (click)="deleteErrand(errand.id)"
+                      >
+                        {{ deletingErrandId() === errand.id
+                          ? t('plans.editor.deletingErrand')
+                          : t('plans.editor.confirmDelete') }}
+                      </button>
+                    </div>
+                  </div>
+                }
               </li>
             }
           </ol>
+        }
+
+        @if (reorderingErrands()) {
+          <p class="mt-3 text-sm text-[var(--ef-text-muted)]" role="status">
+            {{ t('plans.editor.reorderingErrands') }}
+          </p>
+        }
+
+        @if (errandMutationError(); as error) {
+          <div class="mt-4 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-4" role="alert">
+            <p class="text-sm text-[var(--mat-sys-error)]">
+              {{ t('plans.editor.errandMutationErrors.' + error) }}
+            </p>
+            @if (error === 'conflict' || error === 'notFound') {
+              <button
+                type="button"
+                class="mt-3 min-h-10 rounded-xl border border-[var(--ef-border)] px-4 font-semibold"
+                (click)="retry()"
+              >
+                {{ t('plans.editor.reloadPlan') }}
+              </button>
+            }
+          </div>
         }
 
         <!-- Create errand -->
@@ -245,6 +325,10 @@
           <button
             type="button"
             class="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--ef-primary)] px-5 py-3 font-semibold text-[var(--ef-on-primary)] transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)]"
+            [disabled]="
+              errandMutationBusy() || editingEndpoint() !== null ||
+              editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()
+            "
             (click)="startAddingErrand()"
           >
             <span
@@ -300,7 +384,7 @@
 
             <button
               type="button"
-              [disabled]="creatingErrand() || savingEndpoint()"
+              [disabled]="creatingErrand() || savingEndpoint() || errandMutationBusy() || editingErrandId() !== null || confirmingDeleteId() !== null"
               (click)="beginEndpointEdit('destination')"
               class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--ef-primary)] disabled:opacity-50"
             >
@@ -395,7 +479,10 @@
         creatingErrand() ||
         editingEndpoint() !== null ||
         savingErrand() ||
-        savingEndpoint()
+        savingEndpoint() ||
+        errandMutationBusy() ||
+        editingErrandId() !== null ||
+        confirmingDeleteId() !== null
       "
               (click)="calculateRoute()"
               class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--ef-primary)] px-5 py-3 font-semibold text-[var(--ef-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"

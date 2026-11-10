@@ -92,7 +92,21 @@
       "addErrand": "Add errand",
       "saveError": "Unable to save the errand. Please try again.",
       "revisionConflict": "This plan has changed since you opened it. Reload it before continuing.",
-      "reloadPlan": "Reload plan"
+      "reloadPlan": "Reload plan",
+      "editErrand": "Edit errand",
+      "deleteErrand": "Delete errand",
+      "moveErrandUp": "Move errand up",
+      "moveErrandDown": "Move errand down",
+      "deleteConfirm": "Do you want to delete this errand?",
+      "confirmDelete": "Yes, delete",
+      "cancelDelete": "Keep errand",
+      "deletingErrand": "Deleting errand...",
+      "reorderingErrands": "Saving order...",
+      "errandMutationErrors": {
+        "conflict": "The plan has changed. Reload it before continuing.",
+        "notFound": "The errand or plan no longer exists. Reload the plan.",
+        "generic": "Unable to save the errand changes. Please try again."
+      }
     },
     "errandForm": {
       "title": "New errand",
@@ -129,7 +143,12 @@
         "specific": "This search cannot be completed. Try a more specific name or address and city.",
         "rateLimit": "Search limit reached. Please try again later.",
         "unavailable": "Unable to search. Check your connection and try again."
-      }
+      },
+      "editTitle": "Edit errand",
+      "saveChanges": "Save changes",
+      "currentLocation": "Current location",
+      "keepLocation": "This location will be kept unless you choose another.",
+      "changeLocation": "Optional: search for another place or choose it on the map to change the location."
     },
     "endpoint": {
       "change": "Change",
@@ -183,6 +202,26 @@
         "invalid": "The routing service returned invalid route geometry.",
         "generic": "Unable to calculate the route. Check your connection and try again."
       }
+    },
+    "itinerary": {
+      "title": "Your itinerary",
+      "timeZone": "Time zone: {{zone}}",
+      "feasible": "Feasible schedule",
+      "infeasible": "Infeasible schedule",
+      "invalidTimeZone": "The plan time zone is invalid. Local times cannot be displayed.",
+      "partialSchedule": "The plan does not meet every time constraint. The listed stops may be incomplete, and no finish time has been confirmed.",
+      "departure": "Departure",
+      "destination": "Arrival at destination",
+      "completed": "Plan completed",
+      "arrival": "Arrival",
+      "start": "Start",
+      "finish": "Finish",
+      "travel": "Travel",
+      "waiting": "Waiting",
+      "service": "Errand duration",
+      "totalDuration": "Total plan duration",
+      "unknownErrand": "Unknown errand",
+      "unknownLocation": "Location unavailable"
     }
   }
 }

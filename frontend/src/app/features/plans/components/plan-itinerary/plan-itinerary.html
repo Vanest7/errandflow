@@ -1,0 +1,156 @@
+<section
+  *transloco="let t"
+  class="border-t border-[var(--ef-border)] px-5 py-6 sm:px-6"
+  aria-labelledby="plan-itinerary-heading"
+>
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h3 id="plan-itinerary-heading" class="text-xl font-semibold">
+        {{ t('plans.itinerary.title') }}
+      </h3>
+      <p class="mt-1 text-sm text-[var(--ef-text-muted)]">
+        {{ t('plans.itinerary.timeZone', { zone: timeZone() }) }}
+      </p>
+    </div>
+
+    @if (schedule().isFeasible) {
+      <span class="rounded-full bg-[var(--ef-surface-raised)] px-3 py-2 text-sm font-semibold text-[var(--ef-primary)]">
+        {{ t('plans.itinerary.feasible') }}
+      </span>
+    } @else {
+      <span class="rounded-full bg-[var(--ef-surface-raised)] px-3 py-2 text-sm font-semibold text-[var(--mat-sys-error)]">
+        {{ t('plans.itinerary.infeasible') }}
+      </span>
+    }
+  </div>
+
+  @if (!timeZoneValid()) {
+    <p class="mt-4 rounded-xl bg-[var(--ef-surface-raised)] p-4 text-sm" role="alert">
+      {{ t('plans.itinerary.invalidTimeZone') }}
+    </p>
+  }
+
+  @if (!schedule().isFeasible) {
+    <p
+      class="mt-4 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-4 text-sm text-[var(--mat-sys-error)]"
+      role="alert"
+    >
+      {{ t('plans.itinerary.partialSchedule') }}
+    </p>
+  }
+
+  <ol class="relative mt-6 ms-4 border-s-2 border-[var(--ef-border)]">
+    <!-- Starting point -->
+    <li class="relative mb-7 ms-6">
+      <span
+        class="absolute -start-10 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--ef-primary)] text-sm font-bold text-[var(--ef-on-primary)]"
+        aria-hidden="true"
+      >
+        A
+      </span>
+
+      <h4 class="font-semibold">{{ t('plans.itinerary.departure') }}</h4>
+      <p class="mt-1 break-words text-sm text-[var(--ef-text-muted)]">
+        {{ originLabel() ?? t('plans.itinerary.unknownLocation') }}
+      </p>
+      <p class="mt-2 font-semibold text-[var(--ef-primary)]">
+        <time [attr.datetime]="schedule().departureAtUtc">
+          {{ formatTime(schedule().departureAtUtc) }}
+        </time>
+      </p>
+    </li>
+
+    <!-- Scheduled errands -->
+    @for (stop of stops(); track stop.id; let index = $index) {
+      <li class="relative mb-7 ms-6">
+        <span
+          class="absolute -start-10 top-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[var(--ef-accent)] bg-[var(--ef-surface)] text-sm font-bold text-[var(--ef-accent)]"
+          aria-hidden="true"
+        >
+          {{ index + 1 }}
+        </span>
+
+        <h4 class="break-words font-semibold">
+          {{ stop.title ?? t('plans.itinerary.unknownErrand') }}
+        </h4>
+        <p class="mt-1 break-words text-sm text-[var(--ef-text-muted)]">
+          {{ stop.locationLabel ?? t('plans.itinerary.unknownLocation') }}
+        </p>
+
+        <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl bg-[var(--ef-surface-raised)] p-4 text-sm">
+          <div>
+            <dt class="text-[var(--ef-text-muted)]">{{ t('plans.itinerary.arrival') }}</dt>
+            <dd class="mt-1 font-semibold">
+              <time [attr.datetime]="stop.arrivalAtUtc">{{ formatTime(stop.arrivalAtUtc) }}</time>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-[var(--ef-text-muted)]">{{ t('plans.itinerary.start') }}</dt>
+            <dd class="mt-1 font-semibold">
+              <time [attr.datetime]="stop.startAtUtc">{{ formatTime(stop.startAtUtc) }}</time>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-[var(--ef-text-muted)]">{{ t('plans.itinerary.finish') }}</dt>
+            <dd class="mt-1 font-semibold">
+              <time [attr.datetime]="stop.finishAtUtc">{{ formatTime(stop.finishAtUtc) }}</time>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-[var(--ef-text-muted)]">{{ t('plans.itinerary.travel') }}</dt>
+            <dd class="mt-1 font-semibold">{{ formatMinutes(stop.travelMinutes) }}</dd>
+          </div>
+          <div>
+            <dt class="text-[var(--ef-text-muted)]">{{ t('plans.itinerary.service') }}</dt>
+            <dd class="mt-1 font-semibold">{{ formatMinutes(stop.serviceMinutes) }}</dd>
+          </div>
+          @if (stop.waitingMinutes !== null && stop.waitingMinutes > 0) {
+            <div>
+              <dt class="text-[var(--ef-text-muted)]">{{ t('plans.itinerary.waiting') }}</dt>
+              <dd class="mt-1 font-semibold">{{ formatMinutes(stop.waitingMinutes) }}</dd>
+            </div>
+          }
+        </dl>
+      </li>
+    }
+
+    <!-- Finished plan: shown only when the backend confirms feasibility -->
+    @if (schedule().isFeasible) {
+      @if (schedule().finishedAtUtc; as finishedAtUtc) {
+        <li class="relative ms-6">
+          <span
+            class="absolute -start-10 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--ef-primary)] text-sm font-bold text-[var(--ef-on-primary)]"
+            aria-hidden="true"
+          >
+            B
+          </span>
+
+          <h4 class="font-semibold">
+            {{
+              destinationLocationId()
+                ? t('plans.itinerary.destination')
+                : t('plans.itinerary.completed')
+            }}
+          </h4>
+          @if (destinationLocationId()) {
+            <p class="mt-1 break-words text-sm text-[var(--ef-text-muted)]">
+              {{ destinationLabel() ?? t('plans.itinerary.unknownLocation') }}
+            </p>
+          }
+          <p class="mt-2 font-semibold text-[var(--ef-primary)]">
+            <time [attr.datetime]="finishedAtUtc">{{ formatTime(finishedAtUtc) }}</time>
+          </p>
+        </li>
+      }
+    }
+  </ol>
+
+  @if (totalMinutes() !== null) {
+    <div class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--ef-surface-raised)] p-4">
+      <span class="text-sm font-semibold">{{ t('plans.itinerary.totalDuration') }}</span>
+      <strong class="text-lg text-[var(--ef-primary)]">
+        {{ formatMinutes(totalMinutes()) }}
+      </strong>
+    </div>
+  }
+</section>

@@ -5,6 +5,9 @@ import {
   type CreateErrandInput,
   type ErrandDto,
   type ErrandMutationResult,
+  type ReorderErrandsInput,
+  type ReorderErrandsResult,
+  type UpdateErrandInput,
 } from '../../../core/api/generated';
 
 @Injectable({ providedIn: 'root' })
@@ -17,6 +20,33 @@ export class ErrandsApiService {
 
   create(planId: string, body: CreateErrandInput): Observable<ErrandMutationResult> {
     return this.api.apiPlansPlanIdErrandsPost$Json({
+      planId,
+      body,
+    });
+  }
+
+  update(
+    planId: string,
+    errandId: string,
+    body: UpdateErrandInput,
+  ): Observable<ErrandMutationResult> {
+    return this.api.apiPlansPlanIdErrandsErrandIdPut$Json({
+      planId,
+      errandId,
+      body,
+    });
+  }
+
+  delete(planId: string, errandId: string, expectedRevision: number | string): Observable<void> {
+    return this.api.apiPlansPlanIdErrandsErrandIdDelete({
+      planId,
+      errandId,
+      expectedRevision,
+    });
+  }
+
+  reorder(planId: string, body: ReorderErrandsInput): Observable<ReorderErrandsResult> {
+    return this.api.apiPlansPlanIdErrandsOrderPut$Json({
       planId,
       body,
     });

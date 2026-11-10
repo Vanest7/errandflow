@@ -1,11 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, input, model, output, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, input, model, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { finalize } from 'rxjs';
 
-import type { NewLocationInput, PlaceSearchResultDto } from '../../../../core/api/generated';
+import type { ErrandDto, LocationDto, NewLocationInput, PlaceSearchResultDto } from '../../../../core/api/generated';
 
 import { trimmedRequiredValidator } from '../../../../shared/validators/trimmed-required.validator';
 import { PlacesApiService, type SearchCenter } from '../../data-access/places-api.service';
@@ -15,6 +15,14 @@ export interface NewErrandValue {
   title: string;
   durationMinutes: number;
   newLocation: NewLocationInput;
+}
+
+export interface UpdatedErrandValue {
+  title: string;
+  durationMinutes: number;
+  location:
+    | { type: 'existing'; locationId: string }
+    | { type: 'new'; newLocation: NewLocationInput };
 }
 
 type SearchError = 'short' | 'specific' | 'rateLimit' | 'unavailable';
@@ -29,7 +37,10 @@ export class ErrandForm {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly saving = input(false);
+  readonly errand = input<ErrandDto | null>(null);
+  readonly currentLocation = input<LocationDto | null>(null);
 
+  readonly updated = output<UpdatedErrandValue>();
   readonly submitted = output<NewErrandValue>();
   readonly cancelled = output<void>();
   readonly mapPoint = model<MapCoordinates | null>(null);
@@ -85,6 +96,16 @@ export class ErrandForm {
   readonly searchError = signal<SearchError | null>(null);
 
   constructor() {
+    effect(() => {
+      const errand = this.errand();
+      if (errand) {
+        this.form.patchValue({
+          title: errand.title,
+          durationMinutes: Number(errand.durationMinutes),
+        });
+      }
+    });
+
     this.areaQuery.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       this.selectedArea.set(null);
       this.areaResults.set([]);
@@ -237,7 +258,7 @@ export class ErrandForm {
   }
 
   submit(): void {
-    if (this.saving()) {
+    if (this.saving() || this.searching() || this.searchingArea() || this.pickingOnMap()) {
       return;
     }
 
@@ -248,14 +269,14 @@ export class ErrandForm {
 
     const selected = this.selectedPlace();
     const point = this.mapPoint();
+    const existing = this.errand();
 
-    if (!selected && !point) {
+    if (!selected && !point && !existing) {
       return;
     }
 
     const { title, durationMinutes } = this.form.getRawValue();
-
-    let newLocation: NewLocationInput;
+    let newLocation: NewLocationInput | null = null;
 
     if (selected) {
       newLocation = {
@@ -276,7 +297,20 @@ export class ErrandForm {
         latitude: point.latitude,
         longitude: point.longitude,
       };
-    } else {
+    }
+
+    if (existing) {
+      this.updated.emit({
+        title: title.trim(),
+        durationMinutes,
+        location: newLocation
+          ? { type: 'new', newLocation }
+          : { type: 'existing', locationId: existing.locationId },
+      });
+      return;
+    }
+
+    if (!newLocation) {
       return;
     }
 

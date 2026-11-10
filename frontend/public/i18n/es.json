@@ -92,7 +92,21 @@
       "addErrand": "Añadir recado",
       "saveError": "No se ha podido guardar el recado. Inténtalo de nuevo.",
       "revisionConflict": "El plan ha cambiado desde que lo abriste. Recárgalo antes de continuar.",
-      "reloadPlan": "Recargar plan"
+      "reloadPlan": "Recargar plan",
+      "editErrand": "Editar recado",
+      "deleteErrand": "Eliminar recado",
+      "moveErrandUp": "Subir recado",
+      "moveErrandDown": "Bajar recado",
+      "deleteConfirm": "¿Quieres eliminar este recado?",
+      "confirmDelete": "Sí, eliminar",
+      "cancelDelete": "Conservar recado",
+      "deletingErrand": "Eliminando recado...",
+      "reorderingErrands": "Guardando orden...",
+      "errandMutationErrors": {
+        "conflict": "El plan ha cambiado. Recárgalo antes de continuar.",
+        "notFound": "El recado o el plan ya no existe. Recarga el plan.",
+        "generic": "No se han podido guardar los cambios del recado. Inténtalo de nuevo."
+      }
     },
     "errandForm": {
       "title": "Nuevo recado",
@@ -129,7 +143,12 @@
         "specific": "No se puede realizar esta búsqueda. Prueba con un nombre o dirección más específicos y una localidad.",
         "rateLimit": "Se ha alcanzado el límite de búsquedas. Inténtalo más tarde.",
         "unavailable": "No se ha podido buscar. Comprueba la conexión e inténtalo de nuevo."
-      }
+      },
+      "editTitle": "Editar recado",
+      "saveChanges": "Guardar cambios",
+      "currentLocation": "Ubicación actual",
+      "keepLocation": "Se mantendrá esta ubicación si no eliges otra.",
+      "changeLocation": "Opcional: busca otro lugar o selecciónalo en el mapa para cambiar la ubicación."
     },
     "endpoint": {
       "change": "Cambiar",
@@ -183,6 +202,26 @@
         "invalid": "El servicio ha devuelto una geometría de ruta no válida.",
         "generic": "No se ha podido calcular la ruta. Comprueba la conexión e inténtalo de nuevo."
       }
+    },
+    "itinerary": {
+      "title": "Tu itinerario",
+      "timeZone": "Zona horaria: {{zone}}",
+      "feasible": "Horario viable",
+      "infeasible": "Horario no viable",
+      "invalidTimeZone": "La zona horaria del plan no es válida. No se pueden mostrar horas locales.",
+      "partialSchedule": "El plan no cumple todas las restricciones horarias. Las paradas que aparecen pueden ser parciales; no se ha confirmado una hora de finalización.",
+      "departure": "Salida",
+      "destination": "Llegada al destino",
+      "completed": "Fin del plan",
+      "arrival": "Llegada",
+      "start": "Inicio",
+      "finish": "Fin",
+      "travel": "Desplazamiento",
+      "waiting": "Espera",
+      "service": "Duración del recado",
+      "totalDuration": "Duración total del plan",
+      "unknownErrand": "Recado sin identificar",
+      "unknownLocation": "Ubicación no disponible"
     }
   }
 }
