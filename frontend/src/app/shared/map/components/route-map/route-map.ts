@@ -31,6 +31,7 @@ import { ThemeService } from '../../../../core/theme/theme.service';
 
 import type { MapStop } from '../../models/map-stop.model';
 import type { MapCoordinates } from '../../models/map-coordinates';
+import {LineString} from "ol/geom";
 
 @Component({
   selector: 'app-route-map',
@@ -51,6 +52,8 @@ export class RouteMap implements AfterViewInit, OnDestroy {
 
   readonly stops = input.required<readonly MapStop[]>();
 
+  readonly routeLegs = input<readonly (readonly MapCoordinates[])[]>([]);
+
   readonly picking = input(false);
 
   readonly pickTarget = input<'errand' | 'origin' | 'destination'>('errand');
@@ -64,6 +67,8 @@ export class RouteMap implements AfterViewInit, OnDestroy {
   protected readonly selectedStop = signal<MapStop | null>(null);
 
   private map?: OlMap;
+
+  private readonly routeSource = new VectorSource<Feature<LineString>>();
 
   private readonly markerSource = new VectorSource<Feature<Point>>();
 
@@ -115,7 +120,15 @@ export class RouteMap implements AfterViewInit, OnDestroy {
         }
 
         this.updateMarkerStyles(isDark);
+        this.updateRouteStyles();
         this.renderDraftPoint(this.draftPoint());
+      });
+      effect(() => {
+        const legs = this.routeLegs();
+
+        untracked(() => {
+          this.renderRouteLegs(legs);
+        });
       });
     });
   }
@@ -124,10 +137,10 @@ export class RouteMap implements AfterViewInit, OnDestroy {
     this.initializeMap();
 
     this.renderStops(this.stops());
-
     this.renderDraftPoint(this.draftPoint());
-
     this.focusOn(this.focusPoint());
+
+    this.renderRouteLegs(this.routeLegs());
 
     this.updateCursor(this.picking());
   }
@@ -143,6 +156,10 @@ export class RouteMap implements AfterViewInit, OnDestroy {
       layers: [
         new TileLayer({
           source: new OSM(),
+        }),
+
+        new VectorLayer({
+          source: this.routeSource,
         }),
 
         new VectorLayer({
@@ -406,6 +423,77 @@ export class RouteMap implements AfterViewInit, OnDestroy {
 
     if (viewport) {
       viewport.style.cursor = picking ? 'crosshair' : '';
+    }
+  }
+  private renderRouteLegs(legs: readonly (readonly MapCoordinates[])[]): void {
+    if (!this.map) {
+      return;
+    }
+
+    this.routeSource.clear();
+
+    for (const leg of legs) {
+      if (
+        leg.length < 2 ||
+        leg.some(
+          (point) =>
+            !Number.isFinite(point.latitude) ||
+            !Number.isFinite(point.longitude) ||
+            point.latitude < -90 ||
+            point.latitude > 90 ||
+            point.longitude < -180 ||
+            point.longitude > 180,
+        )
+      ) {
+        continue;
+      }
+
+      const coordinates = leg.map((point) => fromLonLat([point.longitude, point.latitude]));
+
+      const feature = new Feature<LineString>({
+        geometry: new LineString(coordinates),
+      });
+
+      this.routeSource.addFeature(feature);
+    }
+
+    this.updateRouteStyles();
+
+    if (this.routeSource.getFeatures().length === 0) {
+      return;
+    }
+
+    this.map.updateSize();
+
+    const extent = this.routeSource.getExtent();
+
+    if (!extent) {
+      return;
+    }
+
+    this.map.getView().fit(extent, {
+      padding: [60, 60, 60, 60],
+      maxZoom: 16,
+      duration: 350,
+    });
+  }
+
+  private updateRouteStyles(): void {
+    if (!this.map) {
+      return;
+    }
+
+    const routeColor = getComputedStyle(this.primarySample.nativeElement).color;
+
+    const style = new Style({
+      stroke: new Stroke({
+        color: routeColor,
+        width: 6,
+      }),
+    });
+
+    for (const feature of this.routeSource.getFeatures()) {
+      feature.setStyle(style);
     }
   }
 }

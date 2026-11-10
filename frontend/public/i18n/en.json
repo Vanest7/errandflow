@@ -159,6 +159,30 @@
         "generic": "Unable to save the location. Please try again.",
         "notAssigned": "The location was created but could not be assigned to the plan. Select Save again to retry the assignment."
       }
+    },
+    "route": {
+      "walking": "Walking route",
+      "description": "Calculate the actual route between your locations.",
+      "calculate": "Calculate route",
+      "recalculate": "Recalculate route",
+      "calculating": "Calculating route...",
+      "needsOrigin": "Select a starting point before calculating a route.",
+      "needsErrands": "Add at least one errand to calculate a route.",
+      "optionalDestination": "No final destination selected. The route will end at the last errand.",
+      "distance": "Total distance",
+      "travelTime": "Walking time",
+      "minutes": "{{count}} min",
+      "visitOrder": "Calculated visit order",
+      "scheduleWarning": "The street route was calculated, but the plan schedule is not feasible using the actual travel times.",
+      "provenInfeasible": "No feasible visit order exists under the current plan constraints.",
+      "noRouteFound": "No feasible route was found. This does not prove that completing the plan is impossible.",
+      "errors": {
+        "conflict": "The plan changed during calculation. Reload it before continuing.",
+        "unavailable": "The routing service is temporarily unavailable. Please try again.",
+        "notFound": "The requested plan could not be found.",
+        "invalid": "The routing service returned invalid route geometry.",
+        "generic": "Unable to calculate the route. Check your connection and try again."
+      }
     }
   }
 }

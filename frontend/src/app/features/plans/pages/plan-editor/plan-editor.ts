@@ -23,9 +23,15 @@ import {
   startWith,
   Subject,
   switchMap,
+  takeUntil,
 } from 'rxjs';
 
-import type { ErrandDto, LocationDto, PlanDto } from '../../../../core/api/generated';
+import type {
+  ErrandDto,
+  LocationDto,
+  OptimizedPlanRouteDto,
+  PlanDto,
+} from '../../../../core/api/generated';
 
 import { LanguageService } from '../../../../i18n/language.service';
 import type { SupportedLanguage } from '../../../../i18n/language.service';
@@ -48,6 +54,8 @@ import { formatPlanDate } from '../../utils/format-plan-date';
 import { RouteMap } from '../../../../shared/map/components/route-map/route-map';
 import type { MapCoordinates } from '../../../../shared/map/models/map-coordinates';
 import type { MapStop } from '../../../../shared/map/models/map-stop.model';
+import { PlanRouteApiService } from '../../data-access/plan-route-api.service';
+import { mapRoutePath } from '../../utils/map-route-path';
 
 type MapPickTarget = 'errand' | EndpointKind;
 type EndpointError = 'conflict' | 'generic' | 'notAssigned';
@@ -72,6 +80,21 @@ export class PlanEditor {
   private readonly errandsApi = inject(ErrandsApiService);
   private readonly locationsApi = inject(LocationsApiService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly routeApi = inject(PlanRouteApiService);
+
+  private readonly routeInvalidated$ = new Subject<void>();
+
+  protected readonly calculatingRoute = signal(false);
+
+  protected readonly calculatedRoute = signal<OptimizedPlanRouteDto | null>(null);
+
+  protected readonly routeError = signal<
+    'conflict' | 'unavailable' | 'notFound' | 'invalid' | 'generic' | null
+  >(null);
+
+  protected readonly routeDetails = computed(() =>
+    mapRoutePath(this.calculatedRoute()?.path ?? null),
+  );
 
   private readonly refresh$ = new Subject<void>();
 
@@ -106,11 +129,32 @@ export class PlanEditor {
     () => new Map(this.locations().map((location) => [location.id, location])),
   );
 
+  protected readonly orderedRouteErrands = computed<ErrandDto[]>(() => {
+    const errands = this.errands();
+    const result = this.calculatedRoute();
+
+    const scheduled = result?.planning.optimized?.scheduledErrands;
+
+    if (!result?.path || !scheduled || scheduled.length !== errands.length) {
+      return errands;
+    }
+
+    const errandsById = new Map(errands.map((errand) => [errand.id, errand]));
+
+    const ordered = scheduled.flatMap((scheduledErrand) => {
+      const errand = errandsById.get(scheduledErrand.errandId);
+
+      return errand ? [errand] : [];
+    });
+
+    return ordered.length === errands.length ? ordered : errands;
+  });
+
   protected readonly mapStops = computed<MapStop[]>(() => {
     const currentPlan = this.plan();
     const locations = this.locationById();
 
-    const stops: MapStop[] = this.errands().flatMap((errand, index) => {
+    const stops: MapStop[] = this.orderedRouteErrands().flatMap((errand, index) => {
       const location = locations.get(errand.locationId);
 
       if (!location) {
@@ -174,6 +218,7 @@ export class PlanEditor {
     combineLatest([planId$, this.refresh$.pipe(startWith(undefined))])
       .pipe(
         switchMap(([planId]) => {
+          this.invalidateRoute();
           this.loading.set(true);
           this.loadError.set(false);
           this.notFound.set(false);
@@ -257,7 +302,7 @@ export class PlanEditor {
     if (!currentPlan || this.savingErrand() || this.savingEndpoint()) {
       return;
     }
-
+    this.invalidateRoute();
     this.createError.set(null);
     this.savingErrand.set(true);
 
@@ -312,7 +357,7 @@ export class PlanEditor {
     if (!currentPlan || !target || this.savingEndpoint()) {
       return;
     }
-
+    this.invalidateRoute();
     this.endpointError.set(null);
     this.savingEndpoint.set(true);
     this.mapPickTarget.set(null);
@@ -463,6 +508,108 @@ export class PlanEditor {
         block: 'start',
       });
     });
+  }
+
+  protected calculateRoute(): void {
+    const currentPlan = this.plan();
+
+    if (
+      !currentPlan ||
+      !currentPlan.originLocationId ||
+      this.errands().length === 0 ||
+      this.calculatingRoute() ||
+      this.creatingErrand() ||
+      this.editingEndpoint() !== null ||
+      this.savingErrand() ||
+      this.savingEndpoint()
+    ) {
+      return;
+    }
+
+    this.invalidateRoute();
+    this.calculatingRoute.set(true);
+
+    this.routeApi
+      .getOptimizedRoute(currentPlan.id)
+      .pipe(
+        takeUntil(this.routeInvalidated$),
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.calculatingRoute.set(false)),
+      )
+      .subscribe({
+        next: (result) => {
+          const activePlan = this.plan();
+
+          if (
+            !activePlan ||
+            activePlan.id !== currentPlan.id ||
+            String(activePlan.revision) !== String(currentPlan.revision) ||
+            String(result.planning.original.revision) !== String(currentPlan.revision)
+          ) {
+            this.routeError.set('conflict');
+            return;
+          }
+
+          if (result.path && !mapRoutePath(result.path)) {
+            this.routeError.set('invalid');
+            return;
+          }
+
+          this.calculatedRoute.set(result);
+        },
+
+        error: (error: unknown) => {
+          if (!(error instanceof HttpErrorResponse)) {
+            this.routeError.set('generic');
+            return;
+          }
+
+          switch (error.status) {
+            case 404:
+              this.routeError.set('notFound');
+              break;
+
+            case 409:
+              this.routeError.set('conflict');
+              break;
+
+            case 503:
+              this.routeError.set('unavailable');
+              break;
+
+            default:
+              this.routeError.set('generic');
+          }
+        },
+      });
+  }
+
+  protected formatRouteDistance(meters: number): string {
+    const locale = this.language.activeLanguage() as SupportedLanguage;
+
+    if (meters < 1000) {
+      return `${new Intl.NumberFormat(locale, {
+        maximumFractionDigits: 0,
+      }).format(meters)} m`;
+    }
+
+    return `${new Intl.NumberFormat(locale, {
+      maximumFractionDigits: 2,
+    }).format(meters / 1000)} km`;
+  }
+
+  protected formatTravelMinutes(seconds: number): string {
+    const locale = this.language.activeLanguage() as SupportedLanguage;
+
+    return new Intl.NumberFormat(locale).format(Math.ceil(seconds / 60));
+  }
+
+  private invalidateRoute(): void {
+    this.routeInvalidated$.next();
+
+    this.calculatedRoute.set(null);
+    this.routeError.set(null);
+    this.calculatingRoute.set(false);
   }
 
   private scrollToMap(): void {

@@ -159,6 +159,30 @@
         "generic": "No se ha podido guardar la ubicación. Inténtalo de nuevo.",
         "notAssigned": "La ubicación se ha creado, pero no se ha podido asignar al plan. Pulsa Guardar de nuevo para reintentar la asignación."
       }
+    },
+    "route": {
+      "walking": "Recorrido a pie",
+      "description": "Calcula el recorrido real entre tus ubicaciones.",
+      "calculate": "Calcular ruta",
+      "recalculate": "Recalcular ruta",
+      "calculating": "Calculando recorrido...",
+      "needsOrigin": "Selecciona un punto de partida para calcular la ruta.",
+      "needsErrands": "Añade al menos un recado para calcular la ruta.",
+      "optionalDestination": "No has seleccionado un destino final. El recorrido terminará en el último recado.",
+      "distance": "Distancia total",
+      "travelTime": "Tiempo caminando",
+      "minutes": "{{count}} min",
+      "visitOrder": "Orden de visita calculado",
+      "scheduleWarning": "El recorrido por las calles se ha calculado, pero los horarios de este plan no son viables según los tiempos reales de desplazamiento.",
+      "provenInfeasible": "No existe un orden de visita viable con las condiciones actuales del plan.",
+      "noRouteFound": "No se ha encontrado un recorrido viable. Esto no demuestra que sea imposible realizar el plan.",
+      "errors": {
+        "conflict": "El plan ha cambiado durante el cálculo. Recárgalo antes de continuar.",
+        "unavailable": "El servicio de rutas no está disponible en este momento. Inténtalo de nuevo.",
+        "notFound": "No se ha encontrado el plan solicitado.",
+        "invalid": "El servicio ha devuelto una geometría de ruta no válida.",
+        "generic": "No se ha podido calcular la ruta. Comprueba la conexión e inténtalo de nuevo."
+      }
     }
   }
 }

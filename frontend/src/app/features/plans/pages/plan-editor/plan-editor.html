@@ -373,14 +373,201 @@
           </h2>
         </div>
 
+        <!-- Route calculation -->
+        <div class="border-b border-[var(--ef-border)] px-6 py-5">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">
+                {{ t('plans.route.walking') }}
+              </p>
+
+              <p class="mt-1 text-sm text-[var(--ef-text-muted)]">
+                {{ t('plans.route.description') }}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              [disabled]="
+        !currentPlan.originLocationId ||
+        errands().length === 0 ||
+        calculatingRoute() ||
+        creatingErrand() ||
+        editingEndpoint() !== null ||
+        savingErrand() ||
+        savingEndpoint()
+      "
+              (click)="calculateRoute()"
+              class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--ef-primary)] px-5 py-3 font-semibold text-[var(--ef-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+      <span
+        class="material-symbols-outlined"
+        aria-hidden="true"
+      >
+        route
+      </span>
+
+              {{
+                calculatedRoute()
+                  ? t('plans.route.recalculate')
+                  : t('plans.route.calculate')
+              }}
+            </button>
+          </div>
+
+          <!-- Requirements -->
+          @if (!currentPlan.originLocationId) {
+            <p class="mt-4 text-sm text-[var(--ef-text-muted)]">
+              {{ t('plans.route.needsOrigin') }}
+            </p>
+          } @else if (errands().length === 0) {
+            <p class="mt-4 text-sm text-[var(--ef-text-muted)]">
+              {{ t('plans.route.needsErrands') }}
+            </p>
+          } @else if (!currentPlan.destinationLocationId) {
+            <p class="mt-4 text-sm text-[var(--ef-text-muted)]">
+              {{ t('plans.route.optionalDestination') }}
+            </p>
+          }
+
+          <!-- Loading -->
+          @if (calculatingRoute()) {
+            <p
+              class="mt-4 flex items-center gap-2 text-sm text-[var(--ef-text-muted)]"
+              role="status"
+            >
+      <span
+        class="material-symbols-outlined animate-spin"
+        aria-hidden="true"
+      >
+        progress_activity
+      </span>
+
+              {{ t('plans.route.calculating') }}
+            </p>
+          }
+
+          <!-- Error -->
+          @if (routeError(); as error) {
+            <div
+              class="mt-4 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-4"
+              role="alert"
+            >
+              <p class="text-sm text-[var(--mat-sys-error)]">
+                {{ t('plans.route.errors.' + error) }}
+              </p>
+
+              @if (error === 'conflict') {
+                <button
+                  type="button"
+                  (click)="retry()"
+                  class="mt-3 min-h-10 rounded-xl border border-[var(--ef-border)] px-4 font-semibold"
+                >
+                  {{ t('plans.editor.reloadPlan') }}
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Calculated route -->
+          @if (calculatedRoute(); as result) {
+            @if (routeDetails(); as details) {
+
+              <!-- Route summary -->
+              <dl
+                class="mt-5 grid grid-cols-2 gap-4 rounded-xl bg-[var(--ef-surface-raised)] p-4"
+                aria-live="polite"
+              >
+                <div>
+                  <dt class="text-sm text-[var(--ef-text-muted)]">
+                    {{ t('plans.route.distance') }}
+                  </dt>
+
+                  <dd class="mt-1 text-xl font-bold text-[var(--ef-primary)]">
+                    {{ formatRouteDistance(details.distanceMeters) }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt class="text-sm text-[var(--ef-text-muted)]">
+                    {{ t('plans.route.travelTime') }}
+                  </dt>
+
+                  <dd class="mt-1 text-xl font-bold text-[var(--ef-primary)]">
+                    {{
+                      t('plans.route.minutes', {
+                        count: formatTravelMinutes(details.travelDurationSeconds)
+                      })
+                    }}
+                  </dd>
+                </div>
+              </dl>
+
+              @if (!result.routeSchedule?.isFeasible) {
+                <p
+                  class="mt-4 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-4 text-sm text-[var(--mat-sys-error)]"
+                  role="alert"
+                >
+                  {{ t('plans.route.scheduleWarning') }}
+                </p>
+              }
+
+            } @else if (result.planning.isProvenInfeasible) {
+              <p class="mt-4 text-sm text-[var(--ef-text-muted)]" role="status">
+                {{ t('plans.route.provenInfeasible') }}
+              </p>
+            } @else {
+              <p class="mt-4 text-sm text-[var(--ef-text-muted)]" role="status">
+                {{ t('plans.route.noRouteFound') }}
+              </p>
+            }
+          }
+        </div>
         <app-route-map
           [stops]="mapStops()"
+          [routeLegs]="routeDetails()?.legs ?? []"
           [picking]="pickingOnMap()"
           [pickTarget]="mapPickTarget() ?? 'errand'"
           [draftPoint]="editingEndpoint() ? endpointMapPoint() : mapPoint()"
           [focusPoint]="areaCenter()"
           (pointPicked)="onMapPointPicked($event)"
         />
+        <!-- Calculated visit order -->
+        @if (calculatedRoute()?.path) {
+          <div class="border-t border-[var(--ef-border)] px-6 py-5">
+            <h3 class="text-lg font-semibold">
+              {{ t('plans.route.visitOrder') }}
+            </h3>
+
+            <ol class="mt-4 space-y-3">
+              @for (
+                errand of orderedRouteErrands();
+                track errand.id;
+                let index = $index
+                ) {
+                <li class="flex items-start gap-3">
+          <span
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--ef-surface-raised)] font-semibold text-[var(--ef-accent)]"
+          >
+            {{ index + 1 }}
+          </span>
+
+                  <div class="min-w-0">
+                    <p class="break-words font-semibold">
+                      {{ errand.title }}
+                    </p>
+
+                    @if (locationById().get(errand.locationId); as location) {
+                      <p class="mt-1 break-words text-sm text-[var(--ef-text-muted)]">
+                        {{ location.label }}
+                      </p>
+                    }
+                  </div>
+                </li>
+              }
+            </ol>
+          </div>
+        }
       </section>
       <!-- End map panel -->
 
