@@ -282,6 +282,11 @@
       "provenOptimal": "El algoritmo ha demostrado que esta solución es óptima.",
       "searchIncomplete": "La búsqueda no ha terminado. Se muestra la mejor solución encontrada hasta ahora, si existe.",
       "bestFound": "La búsqueda ha finalizado, pero no se ha demostrado que la solución sea óptima."
+    },
+    "mobile": {
+      "navigation": "Secciones del plan",
+      "errands": "Recados",
+      "mapAndRoute": "Mapa y ruta"
     }
   }
 }

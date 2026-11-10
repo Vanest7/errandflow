@@ -282,6 +282,11 @@
       "provenOptimal": "The algorithm has proven that this solution is optimal.",
       "searchIncomplete": "The search has not finished. The best solution found so far is shown, if available.",
       "bestFound": "The search has finished, but the solution has not been proven optimal."
+    },
+    "mobile": {
+      "navigation": "Plan sections",
+      "errands": "Errands",
+      "mapAndRoute": "Map and route"
     }
   }
 }

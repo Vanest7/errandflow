@@ -85,6 +85,9 @@ export class PlanEditor {
   @ViewChild('mapPanel')
   private mapPanel?: ElementRef<HTMLElement>;
 
+  @ViewChild('mobileNavigation')
+  private mobileNavigation?: ElementRef<HTMLElement>;
+
   @ViewChild('formPanel')
   private formPanel?: ElementRef<HTMLElement>;
 
@@ -101,6 +104,8 @@ export class PlanEditor {
   private readonly routeInvalidated$ = new Subject<void>();
 
   protected readonly travelMode = signal<SupportedTravelMode>(1);
+
+  protected readonly mobilePanel = signal<'errands' | 'route'>('errands');
 
   protected readonly calculatingRoute = signal(false);
 
@@ -789,6 +794,19 @@ export class PlanEditor {
     }
   }
 
+  protected showMobilePanel(panel: 'errands' | 'route'): void {
+    this.mobilePanel.set(panel);
+
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+      requestAnimationFrame(() => {
+        this.mobileNavigation?.nativeElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      });
+    }
+  }
+
   protected beginMapPick(): void {
     this.mapPickTarget.set('errand');
 
@@ -838,6 +856,7 @@ export class PlanEditor {
     }
 
     this.mapPickTarget.set(null);
+    this.mobilePanel.set('errands');
 
     if (target === 'errand') {
       this.mapPoint.set(point);
@@ -908,6 +927,10 @@ export class PlanEditor {
           }
 
           this.calculatedRoute.set(result);
+
+          if (window.matchMedia('(max-width: 1023px)').matches) {
+            this.scrollToMap();
+          }
         },
 
         error: (error: unknown) => {
@@ -974,10 +997,12 @@ export class PlanEditor {
   }
 
   private scrollToMap(): void {
+    this.mobilePanel.set('route');
+
     requestAnimationFrame(() => {
       this.mapPanel?.nativeElement.scrollIntoView({
         behavior: 'smooth',
-        block: 'center',
+        block: 'start',
       });
     });
   }

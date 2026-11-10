@@ -67,6 +67,8 @@ export class RouteMap implements AfterViewInit, OnDestroy {
   protected readonly selectedStop = signal<MapStop | null>(null);
 
   private map?: OlMap;
+  private resizeObserver?: ResizeObserver;
+  private mapWasVisible = false;
 
   private readonly routeSource = new VectorSource<Feature<LineString>>();
 
@@ -137,6 +139,22 @@ export class RouteMap implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.initializeMap();
 
+    this.resizeObserver = new ResizeObserver(() => {
+      const element = this.mapElement.nativeElement;
+      const isVisible = element.clientWidth > 0 && element.clientHeight > 0;
+
+      if (isVisible) {
+        this.map?.updateSize();
+
+        if (!this.mapWasVisible) {
+          this.fitVisibleMapContent();
+        }
+      }
+
+      this.mapWasVisible = isVisible;
+    });
+    this.resizeObserver.observe(this.mapElement.nativeElement);
+
     this.renderStops(this.stops());
     this.renderDraftPoint(this.draftPoint());
     this.focusOn(this.focusPoint());
@@ -147,7 +165,34 @@ export class RouteMap implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
     this.map?.dispose();
+  }
+
+  private fitVisibleMapContent(): void {
+    if (!this.map) {
+      return;
+    }
+
+    const source = this.routeSource.getFeatures().length > 0
+      ? this.routeSource
+      : this.markerSource;
+
+    if (source.getFeatures().length === 0) {
+      return;
+    }
+
+    const extent = source.getExtent();
+
+    if (!extent) {
+      return;
+    }
+
+    this.map.getView().fit(extent, {
+      padding: [40, 40, 40, 40],
+      maxZoom: 16,
+      duration: 0,
+    });
   }
 
   private initializeMap(): void {
