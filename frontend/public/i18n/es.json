@@ -54,7 +54,9 @@
       "empty": "Añade tu primer recado para visualizar sus ubicaciones.",
       "stop": "Parada",
       "close": "Cerrar información de la parada",
-      "choosePoint": "Haz clic en el mapa para colocar el pin del recado."
+      "choosePoint": "Haz clic en el mapa para colocar el pin del recado.",
+      "chooseOriginPoint": "Haz clic en el mapa para seleccionar el punto de partida.",
+      "chooseDestinationPoint": "Haz clic en el mapa para seleccionar el destino final."
     },
     "home": {
       "title": "Mis planes",
@@ -127,6 +129,35 @@
         "specific": "No se puede realizar esta búsqueda. Prueba con un nombre o dirección más específicos y una localidad.",
         "rateLimit": "Se ha alcanzado el límite de búsquedas. Inténtalo más tarde.",
         "unavailable": "No se ha podido buscar. Comprueba la conexión e inténtalo de nuevo."
+      }
+    },
+    "endpoint": {
+      "change": "Cambiar",
+      "existingLocation": "Seleccionar una ubicación del plan",
+      "noLocation": "Sin ubicación seleccionada",
+      "searchTitle": "Buscar otra ubicación",
+      "searchHint": "Introduce una dirección o el nombre de un lugar junto con su localidad.",
+      "searchPlaceholder": "Ej. Plaza del Ayuntamiento, Valencia",
+      "search": "Buscar",
+      "searching": "Buscando ubicaciones...",
+      "noResults": "No se han encontrado ubicaciones.",
+      "chooseOnMap": "Elegir en el mapa",
+      "pickingOnMap": "Seleccionando en el mapa...",
+      "mapPointSelected": "Punto seleccionado",
+      "locationName": "Nombre de la ubicación",
+      "locationNamePlaceholder": "Ej. Mi casa",
+      "coordinates": "Coordenadas",
+      "saving": "Guardando...",
+      "errors": {
+        "short": "Introduce al menos 3 caracteres.",
+        "specific": "Introduce una búsqueda más específica.",
+        "rateLimit": "Has alcanzado el límite de búsquedas. Inténtalo más tarde.",
+        "unavailable": "No se ha podido realizar la búsqueda."
+      },
+      "saveErrors": {
+        "conflict": "El plan ha cambiado. Recárgalo antes de continuar.",
+        "generic": "No se ha podido guardar la ubicación. Inténtalo de nuevo.",
+        "notAssigned": "La ubicación se ha creado, pero no se ha podido asignar al plan. Pulsa Guardar de nuevo para reintentar la asignación."
       }
     }
   }

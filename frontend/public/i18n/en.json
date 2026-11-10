@@ -54,7 +54,9 @@
       "empty": "Add your first errand to view its location on the map.",
       "stop": "Stop",
       "close": "Close stop details",
-      "choosePoint": "Click on the map to place the errand marker."
+      "choosePoint": "Click on the map to place the errand marker.",
+      "chooseOriginPoint": "Click on the map to select the starting point.",
+      "chooseDestinationPoint": "Click on the map to select the final destination."
     },
     "home": {
       "title": "My plans",
@@ -127,6 +129,35 @@
         "specific": "This search cannot be completed. Try a more specific name or address and city.",
         "rateLimit": "Search limit reached. Please try again later.",
         "unavailable": "Unable to search. Check your connection and try again."
+      }
+    },
+    "endpoint": {
+      "change": "Change",
+      "existingLocation": "Select a plan location",
+      "noLocation": "No location selected",
+      "searchTitle": "Search for another location",
+      "searchHint": "Enter an address or place name together with its city.",
+      "searchPlaceholder": "E.g. City Hall Square, Valencia",
+      "search": "Search",
+      "searching": "Searching for locations...",
+      "noResults": "No locations found.",
+      "chooseOnMap": "Choose on map",
+      "pickingOnMap": "Selecting on map...",
+      "mapPointSelected": "Point selected",
+      "locationName": "Location name",
+      "locationNamePlaceholder": "E.g. My home",
+      "coordinates": "Coordinates",
+      "saving": "Saving...",
+      "errors": {
+        "short": "Enter at least 3 characters.",
+        "specific": "Enter a more specific search.",
+        "rateLimit": "Search limit reached. Please try again later.",
+        "unavailable": "Unable to search for locations."
+      },
+      "saveErrors": {
+        "conflict": "The plan has changed. Reload it before continuing.",
+        "generic": "Unable to save the location. Please try again.",
+        "notAssigned": "The location was created but could not be assigned to the plan. Select Save again to retry the assignment."
       }
     }
   }

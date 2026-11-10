@@ -53,6 +53,8 @@ export class RouteMap implements AfterViewInit, OnDestroy {
 
   readonly picking = input(false);
 
+  readonly pickTarget = input<'errand' | 'origin' | 'destination'>('errand');
+
   readonly draftPoint = input<MapCoordinates | null>(null);
 
   readonly focusPoint = input<MapCoordinates | null>(null);
@@ -228,7 +230,7 @@ export class RouteMap implements AfterViewInit, OnDestroy {
 
       feature.set('stop', stop);
 
-      feature.setStyle(this.createMarkerStyle(stop.position, this.theme.isDark()));
+      feature.setStyle(this.createMarkerStyle(stop, this.theme.isDark()));
 
       this.markerSource.addFeature(feature);
     }
@@ -294,19 +296,27 @@ export class RouteMap implements AfterViewInit, OnDestroy {
     this.draftSource.addFeature(feature);
   }
 
-  private createMarkerStyle(position: number, isDark: boolean): Style {
+  private createMarkerStyle(stop: MapStop, isDark: boolean): Style {
     const accentColor = getComputedStyle(this.accentSample.nativeElement).color;
 
-    const textColor = isDark ? '#1b2834' : '#ffffff';
+    const primaryColor = getComputedStyle(this.primarySample.nativeElement).color;
 
+    const isOrigin = stop.kind === 'origin';
+    const isDestination = stop.kind === 'destination';
+
+    const markerColor = isOrigin ? primaryColor : accentColor;
+
+    const markerText = isOrigin ? 'A' : isDestination ? 'B' : String(stop.position);
+
+    const textColor = isDark ? '#1b2834' : '#ffffff';
     const borderColor = isDark ? '#253746' : '#ffffff';
 
     return new Style({
       image: new CircleStyle({
-        radius: 19,
+        radius: isOrigin || isDestination ? 21 : 19,
 
         fill: new Fill({
-          color: accentColor,
+          color: markerColor,
         }),
 
         stroke: new Stroke({
@@ -316,7 +326,7 @@ export class RouteMap implements AfterViewInit, OnDestroy {
       }),
 
       text: new Text({
-        text: String(position),
+        text: markerText,
         font: 'bold 14px Roboto, sans-serif',
 
         fill: new Fill({
@@ -360,7 +370,7 @@ export class RouteMap implements AfterViewInit, OnDestroy {
     for (const feature of this.markerSource.getFeatures()) {
       const stop = feature.get('stop') as MapStop;
 
-      feature.setStyle(this.createMarkerStyle(stop.position, isDark));
+      feature.setStyle(this.createMarkerStyle(stop, isDark));
     }
   }
 

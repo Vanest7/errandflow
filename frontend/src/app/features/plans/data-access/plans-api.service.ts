@@ -1,7 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { PlansService } from '../../../core/api/generated';
-import type { PlanDto, PlanInput, PlanSummaryDto } from '../../../core/api/generated';
+
+import {
+  PlansService,
+  type PlanDto,
+  type PlanInput,
+  type PlanSummaryDto,
+  type SetPlanLocationsInput,
+} from '../../../core/api/generated';
 
 @Injectable({ providedIn: 'root' })
 export class PlansApiService {
@@ -17,5 +23,12 @@ export class PlansApiService {
 
   create(input: PlanInput): Observable<PlanDto> {
     return this.api.apiPlansPost$Json({ body: input });
+  }
+
+  setLocations(planId: string, input: SetPlanLocationsInput): Observable<PlanDto> {
+    return this.api.apiPlansPlanIdLocationsPut$Json({
+      planId,
+      body: input,
+    });
   }
 }

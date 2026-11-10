@@ -1,3 +1,5 @@
+export type MapStopKind = 'errand' | 'origin' | 'destination';
+
 export interface MapStop {
   id: string;
   title: string;
@@ -5,4 +7,5 @@ export interface MapStop {
   latitude: number;
   longitude: number;
   position: number;
+  kind?: MapStopKind;
 }

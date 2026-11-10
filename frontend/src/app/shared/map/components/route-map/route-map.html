@@ -27,7 +27,13 @@
       aria-live="polite"
     >
       <p class="font-semibold text-[var(--ef-primary)]">
-        {{ t('plans.map.choosePoint') }}
+        {{
+          pickTarget() === 'origin'
+            ? t('plans.map.chooseOriginPoint')
+            : pickTarget() === 'destination'
+              ? t('plans.map.chooseDestinationPoint')
+              : t('plans.map.choosePoint')
+        }}
       </p>
     </div>
   }
@@ -52,7 +58,13 @@
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
           <span class="text-sm font-semibold text-[var(--ef-accent)]">
-            {{ t('plans.map.stop') }} {{ stop.position }}
+            @if (stop.kind === 'origin') {
+              {{ t('plans.editor.origin') }}
+            } @else if (stop.kind === 'destination') {
+              {{ t('plans.editor.destination') }}
+            } @else {
+              {{ t('plans.map.stop') }} {{ stop.position }}
+            }
           </span>
 
           <h3 class="mt-2 break-words font-semibold">

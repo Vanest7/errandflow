@@ -1,0 +1,210 @@
+<form
+  *transloco="let t"
+  (submit)="submit($event)"
+  class="mt-4 space-y-5 rounded-xl bg-[var(--ef-surface-raised)] p-4"
+>
+  <div>
+    <label
+      [attr.for]="'endpoint-location-' + kind()"
+      class="mb-2 block text-sm font-semibold"
+    >
+      {{ t('plans.endpoint.existingLocation') }}
+    </label>
+
+    <select
+      [id]="'endpoint-location-' + kind()"
+      [value]="selectedLocationId() ?? ''"
+      [disabled]="saving() || searching()"
+      (change)="selectExisting($event)"
+      class="min-h-11 w-full rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] px-3 py-3 text-[var(--ef-text)] focus-visible:outline-2 focus-visible:outline-[var(--ef-primary)]"
+    >
+      <option value="">
+        {{ t('plans.endpoint.noLocation') }}
+      </option>
+
+      @for (location of locations(); track location.id) {
+        <option [value]="location.id">
+          {{ location.label }}
+        </option>
+      }
+    </select>
+  </div>
+
+  <div class="border-t border-[var(--ef-border)] pt-4">
+    <label
+      [attr.for]="'endpoint-search-' + kind()"
+      class="mb-2 block text-sm font-semibold"
+    >
+      {{ t('plans.endpoint.searchTitle') }}
+    </label>
+
+    <p class="mb-3 text-sm text-[var(--ef-text-muted)]">
+      {{ t('plans.endpoint.searchHint') }}
+    </p>
+
+    <div class="flex flex-col gap-2 sm:flex-row">
+      <input
+        [id]="'endpoint-search-' + kind()"
+        type="search"
+        maxlength="150"
+        [formControl]="searchQuery"
+        [placeholder]="t('plans.endpoint.searchPlaceholder')"
+        class="min-w-0 flex-1 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] px-3 py-3 text-[var(--ef-text)] focus-visible:outline-2 focus-visible:outline-[var(--ef-primary)]"
+      />
+
+      <button
+        type="button"
+        [disabled]="saving() || searching()"
+        (click)="searchPlaces()"
+        class="min-h-11 rounded-xl border border-[var(--ef-primary)] px-4 font-semibold text-[var(--ef-primary)] disabled:opacity-50"
+      >
+        {{ t('plans.endpoint.search') }}
+      </button>
+    </div>
+
+    @if (searching()) {
+      <p class="mt-3 text-sm text-[var(--ef-text-muted)]" aria-live="polite">
+        {{ t('plans.endpoint.searching') }}
+      </p>
+    }
+
+    @if (searchError(); as error) {
+      <p class="mt-3 text-sm text-[var(--mat-sys-error)]" role="alert">
+        {{ t('plans.endpoint.errors.' + error) }}
+      </p>
+    }
+
+    @if (searched() && searchResults().length === 0) {
+      <p class="mt-3 text-sm text-[var(--ef-text-muted)]">
+        {{ t('plans.endpoint.noResults') }}
+      </p>
+    }
+
+    @if (searchResults().length > 0) {
+      <ul class="mt-3 space-y-2">
+        @for (place of searchResults(); track $index) {
+          <li>
+            <button
+              type="button"
+              [disabled]="saving()"
+              (click)="selectPlace(place)"
+              class="w-full rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] p-3 text-left focus-visible:outline-2 focus-visible:outline-[var(--ef-primary)] disabled:opacity-50"
+            >
+              <span class="block font-semibold">
+                {{ place.label }}
+              </span>
+
+              @if (place.address) {
+                <span class="mt-1 block text-sm text-[var(--ef-text-muted)]">
+                  {{ place.address }}
+                </span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (selectedPlace(); as place) {
+      <p class="mt-3 flex items-center gap-2 text-sm font-semibold text-[var(--ef-primary)]">
+        <span class="material-symbols-outlined" aria-hidden="true">
+          check_circle
+        </span>
+
+        {{ place.label }}
+      </p>
+    }
+
+    <p class="mt-3 text-xs text-[var(--ef-text-muted)]">
+      ©
+      <a
+        href="https://www.openstreetmap.org/copyright"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline"
+      >
+        OpenStreetMap contributors
+      </a>
+    </p>
+  </div>
+
+  <div class="border-t border-[var(--ef-border)] pt-4">
+    <button
+      type="button"
+      [disabled]="saving()"
+      (click)="chooseOnMap()"
+      class="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--ef-primary)] px-4 py-3 font-semibold text-[var(--ef-primary)] disabled:opacity-50"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">
+        location_on
+      </span>
+
+      {{
+        picking()
+          ? t('plans.endpoint.pickingOnMap')
+          : t('plans.endpoint.chooseOnMap')
+      }}
+    </button>
+
+    @if (mapPoint(); as point) {
+      <div class="mt-4 rounded-xl border border-[var(--ef-primary)] bg-[var(--ef-surface)] p-4">
+        <p class="mb-3 text-sm font-semibold text-[var(--ef-primary)]">
+          {{ t('plans.endpoint.mapPointSelected') }}
+        </p>
+
+        @if (!selectedPlace()) {
+          <label
+            [attr.for]="'endpoint-label-' + kind()"
+            class="mb-2 block text-sm font-semibold"
+          >
+            {{ t('plans.endpoint.locationName') }}
+          </label>
+
+          <input
+            [id]="'endpoint-label-' + kind()"
+            type="text"
+            maxlength="150"
+            [formControl]="manualLabel"
+            [placeholder]="t('plans.endpoint.locationNamePlaceholder')"
+            class="w-full rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] px-3 py-3 text-[var(--ef-text)] focus-visible:outline-2 focus-visible:outline-[var(--ef-primary)]"
+          />
+
+          @if (manualLabel.touched && manualLabel.invalid) {
+            <p class="mt-2 text-sm text-[var(--mat-sys-error)]" role="alert">
+              {{ t('forms.errors.required') }}
+            </p>
+          }
+        }
+
+        <p class="mt-3 text-xs text-[var(--ef-text-muted)]">
+          {{ t('plans.endpoint.coordinates') }}:
+          {{ point.latitude.toFixed(6) }},
+          {{ point.longitude.toFixed(6) }}
+        </p>
+      </div>
+    }
+  </div>
+
+  <div class="flex flex-wrap justify-end gap-3 border-t border-[var(--ef-border)] pt-4">
+    <button
+      type="button"
+      [disabled]="saving()"
+      (click)="cancelled.emit()"
+      class="min-h-11 rounded-xl border border-[var(--ef-border)] px-4 font-semibold disabled:opacity-50"
+    >
+      {{ t('common.cancel') }}
+    </button>
+
+    <button
+      type="submit"
+      [disabled]="saving() || searching() || picking()"
+      class="min-h-11 rounded-xl bg-[var(--ef-primary)] px-5 font-semibold text-[var(--ef-on-primary)] disabled:opacity-50"
+    >
+      {{
+        saving()
+          ? t('plans.endpoint.saving')
+          : t('common.save')
+      }}
+    </button>
+  </div>
+</form>

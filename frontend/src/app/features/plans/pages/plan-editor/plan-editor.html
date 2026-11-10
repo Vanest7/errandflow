@@ -98,24 +98,51 @@
 
         <!-- Origin -->
         <div class="mt-6 rounded-xl border border-[var(--ef-border)] p-4">
-          <p class="flex items-center gap-2 text-sm font-semibold">
-            <span
-              class="material-symbols-outlined text-xl text-[var(--ef-primary)]"
-              aria-hidden="true"
+          <div class="flex items-center justify-between gap-3">
+            <p class="flex items-center gap-2 text-sm font-semibold">
+              <span
+                class="material-symbols-outlined text-xl text-[var(--ef-primary)]"
+                aria-hidden="true"
+              >
+                trip_origin
+              </span>
+
+              {{ t('plans.editor.origin') }}
+            </p>
+
+            <button
+              type="button"
+              [disabled]="creatingErrand() || savingEndpoint()"
+              (click)="beginEndpointEdit('origin')"
+              class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--ef-primary)] disabled:opacity-50"
             >
-              trip_origin
-            </span>
+              {{ t('plans.endpoint.change') }}
+            </button>
+          </div>
 
-            {{ t('plans.editor.origin') }}
-          </p>
-
-          <p class="mt-2 pl-7 text-sm text-[var(--ef-text-muted)]">
+          <p class="mt-2 break-words pl-7 text-sm text-[var(--ef-text-muted)]">
             {{
-              currentPlan.originLocationId
-                ? t('plans.editor.locationConfigured')
-                : t('plans.editor.locationPending')
+              locationById().get(currentPlan.originLocationId ?? '')?.label
+              ?? t('plans.editor.locationPending')
             }}
           </p>
+
+          @if (editingEndpoint() === 'origin') {
+            <div #endpointPanel>
+              <app-plan-endpoint-picker
+                kind="origin"
+                [locations]="locations()"
+                [currentLocationId]="currentPlan.originLocationId"
+                [mapPoint]="endpointMapPoint()"
+                [picking]="mapPickTarget() === 'origin'"
+                [saving]="savingEndpoint()"
+                (submitted)="saveEndpoint($event)"
+                (cancelled)="cancelEndpointEdit()"
+                (pickOnMap)="beginEndpointMapPick()"
+                (previewPoint)="onEndpointPreview($event)"
+              />
+            </div>
+          }
         </div>
 
         <!-- Empty errands state -->
@@ -259,52 +286,105 @@
 
         <!-- Destination -->
         <div class="mt-6 rounded-xl border border-[var(--ef-border)] p-4">
-          <p class="flex items-center gap-2 text-sm font-semibold">
-            <span
-              class="material-symbols-outlined text-xl text-[var(--ef-primary)]"
-              aria-hidden="true"
+          <div class="flex items-center justify-between gap-3">
+            <p class="flex items-center gap-2 text-sm font-semibold">
+              <span
+                class="material-symbols-outlined text-xl text-[var(--ef-primary)]"
+                aria-hidden="true"
+              >
+                flag
+              </span>
+
+              {{ t('plans.editor.destination') }}
+            </p>
+
+            <button
+              type="button"
+              [disabled]="creatingErrand() || savingEndpoint()"
+              (click)="beginEndpointEdit('destination')"
+              class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--ef-primary)] disabled:opacity-50"
             >
-              flag
-            </span>
+              {{ t('plans.endpoint.change') }}
+            </button>
+          </div>
 
-            {{ t('plans.editor.destination') }}
-          </p>
-
-          <p class="mt-2 pl-7 text-sm text-[var(--ef-text-muted)]">
+          <p class="mt-2 break-words pl-7 text-sm text-[var(--ef-text-muted)]">
             {{
-              currentPlan.destinationLocationId
-                ? t('plans.editor.locationConfigured')
-                : t('plans.editor.locationPending')
+              locationById().get(currentPlan.destinationLocationId ?? '')?.label
+              ?? t('plans.editor.locationPending')
             }}
           </p>
+
+          @if (editingEndpoint() === 'destination') {
+            <div #endpointPanel>
+              <app-plan-endpoint-picker
+                kind="destination"
+                [locations]="locations()"
+                [currentLocationId]="currentPlan.destinationLocationId"
+                [mapPoint]="endpointMapPoint()"
+                [picking]="mapPickTarget() === 'destination'"
+                [saving]="savingEndpoint()"
+                (submitted)="saveEndpoint($event)"
+                (cancelled)="cancelEndpointEdit()"
+                (pickOnMap)="beginEndpointMapPick()"
+                (previewPoint)="onEndpointPreview($event)"
+              />
+            </div>
+          }
         </div>
 
+        <!-- Endpoint error -->
+        @if (endpointError(); as error) {
+          <div
+            class="mt-4 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-4"
+            role="alert"
+          >
+            <p class="text-sm text-[var(--mat-sys-error)]">
+              {{ t('plans.endpoint.saveErrors.' + error) }}
+            </p>
+
+            @if (error === 'conflict') {
+              <button
+                type="button"
+                (click)="retry()"
+                class="mt-3 min-h-10 rounded-xl border border-[var(--ef-border)] px-4 font-semibold"
+              >
+                {{ t('plans.editor.reloadPlan') }}
+              </button>
+            }
+          </div>
+        }
+
       </section>
+      <!-- End errands panel -->
 
-    <!-- Map panel -->
-    <section
-      #mapPanel
-      class="overflow-hidden rounded-[var(--ef-radius-card)] border border-[var(--ef-border)] bg-[var(--ef-surface)]"
-      aria-labelledby="map-heading"
-    >
-      <div class="border-b border-[var(--ef-border)] px-6 py-5">
-        <h2
-          id="map-heading"
-          class="text-xl font-semibold"
-        >
-          {{ t('plans.editor.map') }}
-        </h2>
-      </div>
+      <!-- Map panel -->
+      <section
+        #mapPanel
+        class="overflow-hidden rounded-[var(--ef-radius-card)] border border-[var(--ef-border)] bg-[var(--ef-surface)]"
+        aria-labelledby="map-heading"
+      >
+        <div class="border-b border-[var(--ef-border)] px-6 py-5">
+          <h2
+            id="map-heading"
+            class="text-xl font-semibold"
+          >
+            {{ t('plans.editor.map') }}
+          </h2>
+        </div>
 
-      <app-route-map
-        [stops]="mapStops()"
-        [picking]="pickingOnMap()"
-        [draftPoint]="mapPoint()"
-        [focusPoint]="areaCenter()"
-        (pointPicked)="onMapPointPicked($event)"
-      />
-    </section>
+        <app-route-map
+          [stops]="mapStops()"
+          [picking]="pickingOnMap()"
+          [pickTarget]="mapPickTarget() ?? 'errand'"
+          [draftPoint]="editingEndpoint() ? endpointMapPoint() : mapPoint()"
+          [focusPoint]="areaCenter()"
+          (pointPicked)="onMapPointPicked($event)"
+        />
+      </section>
+      <!-- End map panel -->
 
     </div>
+    <!-- End main layout -->
   }
 </main>
