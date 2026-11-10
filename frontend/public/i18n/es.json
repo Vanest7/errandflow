@@ -106,7 +106,9 @@
         "conflict": "El plan ha cambiado. Recárgalo antes de continuar.",
         "notFound": "El recado o el plan ya no existe. Recarga el plan.",
         "generic": "No se han podido guardar los cambios del recado. Inténtalo de nuevo."
-      }
+      },
+      "dragToReorder": "Arrastra para cambiar el orden",
+      "moveToPosition": "Posición"
     },
     "errandForm": {
       "title": "Nuevo recado",

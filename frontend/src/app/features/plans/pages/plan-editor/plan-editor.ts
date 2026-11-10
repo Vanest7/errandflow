@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList } from '@angular/cdk/drag-drop';
 import {
   Component,
   computed,
@@ -56,14 +57,14 @@ import type { MapCoordinates } from '../../../../shared/map/models/map-coordinat
 import type { MapStop } from '../../../../shared/map/models/map-stop.model';
 import { PlanRouteApiService } from '../../data-access/plan-route-api.service';
 import { mapRoutePath } from '../../utils/map-route-path';
-import { moveErrandIds } from '../../utils/reorder-errands';
+import { moveErrandIdsToIndex } from '../../utils/reorder-errands';
 
 type MapPickTarget = 'errand' | EndpointKind;
 type EndpointError = 'conflict' | 'generic' | 'notAssigned';
 
 @Component({
   selector: 'app-plan-editor',
-  imports: [RouterLink, TranslocoDirective, ErrandForm, PlanEndpointPicker, RouteMap],
+  imports: [CdkDrag, CdkDragHandle, CdkDropList, RouterLink, TranslocoDirective, ErrandForm, PlanEndpointPicker, RouteMap],
   templateUrl: './plan-editor.html',
 })
 export class PlanEditor {
@@ -131,6 +132,16 @@ export class PlanEditor {
     [...this.errands()].sort(
       (a, b) => Number(a.originalPosition) - Number(b.originalPosition),
     ),
+  );
+
+  protected readonly canReorderErrands = computed(() =>
+    !this.errandMutationBusy() &&
+    !this.creatingErrand() &&
+    this.editingErrandId() === null &&
+    this.confirmingDeleteId() === null &&
+    this.editingEndpoint() === null &&
+    !this.savingEndpoint() &&
+    this.errandMutationError() !== 'conflict'
   );
 
   protected readonly editingEndpoint = signal<EndpointKind | null>(null);
@@ -571,18 +582,47 @@ export class PlanEditor {
       });
   }
 
-  protected moveErrand(errandId: string, direction: -1 | 1): void {
-    const currentPlan = this.plan();
-    if (
-      !currentPlan || this.errandMutationBusy() ||
-      this.editingErrandId() !== null || this.confirmingDeleteId() !== null ||
-      this.creatingErrand() || this.editingEndpoint() !== null ||
-      this.savingEndpoint() || this.errandMutationError() === 'conflict'
-    ) {
+  protected onErrandDropped(
+    event: CdkDragDrop<ErrandDto[]>,
+  ): void {
+    if (!this.canReorderErrands()) {
       return;
     }
 
-    const errandIds = moveErrandIds(this.originalOrderErrands(), errandId, direction);
+    const errand = this.originalOrderErrands()[event.previousIndex];
+
+    if (!errand) {
+      return;
+    }
+
+    this.changeErrandPosition(errand.id, event.currentIndex);
+  }
+
+  protected onErrandPositionChanged(errandId: string, event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const targetIndex = Number(select.value) - 1;
+
+    this.changeErrandPosition(errandId, targetIndex);
+
+    const originalIndex = this.originalOrderErrands().findIndex(
+      (errand) => errand.id === errandId,
+    );
+    select.value = String(originalIndex + 1);
+  }
+
+  private changeErrandPosition(errandId: string, targetIndex: number): void {
+    const currentPlan = this.plan();
+
+    if (!currentPlan || !this.canReorderErrands()) {
+      return;
+    }
+
+    const errandIds = moveErrandIdsToIndex(
+      this.originalOrderErrands(),
+      errandId,
+      targetIndex,
+    );
+
     if (!errandIds) {
       return;
     }

@@ -23,3 +23,30 @@ export function moveErrandIds(
 
   return orderedIds;
 }
+
+export function moveErrandIdsToIndex(
+  errands: readonly Pick<ErrandDto, 'id' | 'originalPosition'>[],
+  errandId: string,
+  targetIndex: number,
+): string[] | null {
+  const orderedIds = [...errands]
+    .sort((a, b) => Number(a.originalPosition) - Number(b.originalPosition))
+    .map((errand) => errand.id);
+
+  const currentIndex = orderedIds.indexOf(errandId);
+
+  if (
+    currentIndex < 0 ||
+    !Number.isInteger(targetIndex) ||
+    targetIndex < 0 ||
+    targetIndex >= orderedIds.length ||
+    targetIndex === currentIndex
+  ) {
+    return null;
+  }
+
+  const [movedId] = orderedIds.splice(currentIndex, 1);
+  orderedIds.splice(targetIndex, 0, movedId);
+
+  return orderedIds;
+}

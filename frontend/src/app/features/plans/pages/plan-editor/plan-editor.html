@@ -158,9 +158,19 @@
           </div>
         } @else {
           <!-- Errands in the user's original order -->
-          <ol class="my-6 space-y-3">
+          <ol
+            cdkDropList
+            [cdkDropListData]="originalOrderErrands()"
+            [cdkDropListDisabled]="!canReorderErrands()"
+            (cdkDropListDropped)="onErrandDropped($event)"
+            class="my-6 space-y-3"
+          >
             @for (errand of originalOrderErrands(); track errand.id; let index = $index) {
-              <li class="rounded-xl border border-[var(--ef-border)] p-4">
+              <li
+                cdkDrag
+                [cdkDragDisabled]="!canReorderErrands()"
+                class="group/errand rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] p-4 transition-[border-color,box-shadow] duration-150 hover:border-[var(--ef-primary)] hover:shadow-md focus-within:border-[var(--ef-primary)] [&.cdk-drag-preview]:shadow-xl [&.cdk-drag-placeholder]:opacity-30"
+              >
                 <div class="flex items-start gap-4">
                   <span
                     class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--ef-surface-raised)] font-semibold text-[var(--ef-accent)]"
@@ -186,7 +196,7 @@
                 <div class="mt-4 flex flex-wrap gap-2">
                   <button
                     type="button"
-                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--ef-primary)] disabled:opacity-50"
+                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--ef-primary)] transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-[var(--ef-surface-raised)] hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] disabled:transform-none disabled:opacity-50"
                     [disabled]="
                       errandMutationBusy() || creatingErrand() || editingEndpoint() !== null ||
                       editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()
@@ -198,7 +208,7 @@
                   </button>
                   <button
                     type="button"
-                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--mat-sys-error)] disabled:opacity-50"
+                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--mat-sys-error)] transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-[var(--ef-surface-raised)] hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] disabled:transform-none disabled:opacity-50"
                     [disabled]="
                       errandMutationBusy() || creatingErrand() || editingEndpoint() !== null ||
                       editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()
@@ -208,32 +218,48 @@
                   >
                     {{ t('plans.editor.deleteErrand') }}
                   </button>
-                  <button
-                    type="button"
-                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold disabled:opacity-50"
-                    [disabled]="
-                      index === 0 || errandMutationBusy() || creatingErrand() ||
-                      editingEndpoint() !== null || editingErrandId() !== null ||
-                      confirmingDeleteId() !== null || savingEndpoint()
-                    "
-                    [attr.aria-label]="t('plans.editor.moveErrandUp') + ': ' + errand.title"
-                    (click)="moveErrand(errand.id, -1)"
-                  >
-                    <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold disabled:opacity-50"
-                    [disabled]="
-                      index === originalOrderErrands().length - 1 || errandMutationBusy() ||
-                      creatingErrand() || editingEndpoint() !== null ||
-                      editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()
-                    "
-                    [attr.aria-label]="t('plans.editor.moveErrandDown') + ': ' + errand.title"
-                    (click)="moveErrand(errand.id, 1)"
-                  >
-                    <span class="material-symbols-outlined" aria-hidden="true">arrow_downward</span>
-                  </button>
+                  <!-- Accessible reorder controls -->
+                  <div class="ml-auto flex flex-wrap items-center gap-3">
+                    <div class="group/reorder relative">
+                      <button
+                        type="button"
+                        cdkDragHandle
+                        class="flex min-h-10 min-w-10 cursor-grab items-center justify-center rounded-lg border border-[var(--ef-border)] text-[var(--ef-primary)] transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-[var(--ef-surface-raised)] hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
+                        [disabled]="!canReorderErrands()"
+                        [attr.aria-label]="t('plans.editor.dragToReorder') + ': ' + errand.title"
+                        [attr.aria-describedby]="'reorder-help-' + errand.id"
+                      >
+                        <span class="material-symbols-outlined" aria-hidden="true">drag_indicator</span>
+                      </button>
+                      <span
+                        [id]="'reorder-help-' + errand.id"
+                        role="tooltip"
+                        class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-max max-w-52 -translate-x-1/2 rounded-lg bg-[var(--ef-text)] px-3 py-2 text-center text-xs font-semibold text-[var(--ef-surface)] opacity-0 shadow-md transition-opacity duration-150 group-hover/reorder:opacity-100 group-focus-within/reorder:opacity-100"
+                      >
+                        {{ t('plans.editor.dragToReorder') }}
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      <label
+                        [attr.for]="'errand-position-' + errand.id"
+                        class="text-xs font-semibold text-[var(--ef-text-muted)]"
+                      >
+                        {{ t('plans.editor.moveToPosition') }}
+                      </label>
+                      <select
+                        [id]="'errand-position-' + errand.id"
+                        [value]="index + 1"
+                        [disabled]="!canReorderErrands()"
+                        (change)="onErrandPositionChanged(errand.id, $event)"
+                        class="min-h-10 rounded-lg border border-[var(--ef-border)] bg-[var(--ef-surface)] px-2 text-sm text-[var(--ef-text)] transition-colors hover:border-[var(--ef-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] disabled:opacity-50"
+                      >
+                        @for (option of originalOrderErrands(); track option.id; let optionIndex = $index) {
+                          <option [value]="optionIndex + 1">{{ optionIndex + 1 }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
                 @if (editingErrandId() === errand.id) {

@@ -106,7 +106,9 @@
         "conflict": "The plan has changed. Reload it before continuing.",
         "notFound": "The errand or plan no longer exists. Reload the plan.",
         "generic": "Unable to save the errand changes. Please try again."
-      }
+      },
+      "dragToReorder": "Drag to change the order",
+      "moveToPosition": "Position"
     },
     "errandForm": {
       "title": "New errand",
