@@ -190,6 +190,25 @@
                       <span class="material-symbols-outlined text-base" aria-hidden="true">schedule</span>
                       {{ t('plans.editor.duration', { minutes: errand.durationMinutes }) }}
                     </p>
+                    <p class="mt-2 flex flex-wrap items-center gap-1 text-xs text-[var(--ef-text-muted)]">
+                      <span class="material-symbols-outlined text-base" aria-hidden="true">event</span>
+                      @if (errand.fixedStartAt) {
+                        {{ t('plans.schedule.currentAppointment') }}:
+                        {{ formatErrandScheduleTime(errand.fixedStartAt, currentPlan.timeZone) }}
+                      } @else if (errand.earliestStartAt || errand.latestFinishAt) {
+                        {{ t('plans.schedule.currentWindow') }}:
+                        @if (errand.earliestStartAt) {
+                          {{ formatErrandScheduleTime(errand.earliestStartAt, currentPlan.timeZone) }}
+                        }
+                        @if (errand.latestFinishAt) {
+                          {{ t('plans.schedule.until') }}
+                          {{ formatErrandScheduleTime(errand.latestFinishAt, currentPlan.timeZone) }}
+                        }
+                      } @else {
+                        {{ t('plans.schedule.currentAnytime') }}
+                      }
+                    </p>
+
                   </div>
                 </div>
 
@@ -197,6 +216,16 @@
                   <button
                     type="button"
                     class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--ef-primary)] transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-[var(--ef-surface-raised)] hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] disabled:transform-none disabled:opacity-50"
+                    [disabled]="errandMutationBusy() || creatingErrand() || editingEndpoint() !== null || editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()"
+                    [attr.aria-label]="t('plans.schedule.edit') + ': ' + errand.title"
+                    (click)="openErrandSchedule(errand.id)"
+                  >
+                    <span class="material-symbols-outlined mr-1 align-middle text-lg" aria-hidden="true">event</span>
+                    {{ t('plans.schedule.edit') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--ef-primary)] transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-[var(--ef-surface-raised)] hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] disabled:transform-none disabled:opacity-50"
                     [disabled]="
                       errandMutationBusy() || creatingErrand() || editingEndpoint() !== null ||
                       editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()
@@ -204,11 +233,16 @@
                     [attr.aria-label]="t('plans.editor.editErrand') + ': ' + errand.title"
                     (click)="startEditingErrand(errand)"
                   >
-                    {{ t('plans.editor.editErrand') }}
+                    <span
+                      class="material-symbols-outlined text-xl"
+                      aria-hidden="true"
+                    >
+  edit
+</span>
                   </button>
                   <button
                     type="button"
-                    class="min-h-10 rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--mat-sys-error)] transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-[var(--ef-surface-raised)] hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] disabled:transform-none disabled:opacity-50"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--ef-border)] px-3 text-sm font-semibold text-[var(--mat-sys-error)] transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-[var(--ef-surface-raised)] hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] disabled:transform-none disabled:opacity-50"
                     [disabled]="
                       errandMutationBusy() || creatingErrand() || editingEndpoint() !== null ||
                       editingErrandId() !== null || confirmingDeleteId() !== null || savingEndpoint()
@@ -216,7 +250,12 @@
                     [attr.aria-label]="t('plans.editor.deleteErrand') + ': ' + errand.title"
                     (click)="askDeleteErrand(errand.id)"
                   >
-                    {{ t('plans.editor.deleteErrand') }}
+                    <span
+                      class="material-symbols-outlined text-xl"
+                      aria-hidden="true"
+                    >
+  delete
+</span>
                   </button>
                   <!-- Accessible reorder controls -->
                   <div class="ml-auto flex flex-wrap items-center gap-3">
@@ -261,6 +300,33 @@
                     </div>
                   </div>
                 </div>
+
+                @if (schedulingErrandId() === errand.id) {
+                  <app-errand-schedule-form
+                    [errand]="errand"
+                    [timeZone]="currentPlan.timeZone"
+                    [planDate]="currentPlan.planDate"
+                    [saving]="savingSchedule()"
+                    (submitted)="saveErrandSchedule($event)"
+                    (cancelled)="cancelErrandSchedule()"
+                  />
+                  @if (scheduleError(); as error) {
+                    <div class="mt-3 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-4" role="alert">
+                      <p class="text-sm text-[var(--mat-sys-error)]">
+                        {{ t('plans.schedule.errors.' + error) }}
+                      </p>
+                      @if (error === 'conflict' || error === 'notFound') {
+                        <button
+                          type="button"
+                          class="mt-3 min-h-10 rounded-lg border border-[var(--ef-border)] px-4 text-sm font-semibold transition-colors hover:bg-[var(--ef-surface)]"
+                          (click)="retry()"
+                        >
+                          {{ t('plans.editor.reloadPlan') }}
+                        </button>
+                      }
+                    </div>
+                  }
+                }
 
                 @if (editingErrandId() === errand.id) {
                   <div #formPanel>
@@ -681,6 +747,15 @@
             </ol>
           </div>
         }
+        <!-- Route comparison -->
+        @if (calculatedRoute(); as result) {
+          <app-route-comparison
+            [planning]="result.planning"
+            [errands]="errands()"
+            [timeZone]="currentPlan.timeZone"
+          />
+        }
+
       </section>
       <!-- End map panel -->
 

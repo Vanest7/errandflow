@@ -224,6 +224,59 @@
       "totalDuration": "Duración total del plan",
       "unknownErrand": "Recado sin identificar",
       "unknownLocation": "Ubicación no disponible"
+    },
+    "schedule": {
+      "heading": "Horario del recado",
+      "type": "¿Cuándo puedes hacerlo?",
+      "timeZone": "Zona horaria",
+      "anytime": "Sin restricciones",
+      "window": "Dentro de un horario",
+      "appointment": "Cita con hora fija",
+      "anytimeHelp": "Podrás realizar este recado cuando te venga mejor según el itinerario.",
+      "windowHelp": "Podrás empezar a partir de la primera hora indicada y debes terminar antes o a la hora límite. El cálculo tiene en cuenta la duración del recado.",
+      "appointmentHelp": "El recado deberá comenzar a esta hora exacta. Si llegas antes, el itinerario mostrará la espera.",
+      "earliest": "Inicio permitido desde",
+      "latest": "Terminar antes de",
+      "fixedStart": "Hora de la cita",
+      "save": "Guardar horario",
+      "saving": "Guardando horario…",
+      "edit": "Horario",
+      "currentAnytime": "Sin horario definido",
+      "currentWindow": "Horario permitido",
+      "currentAppointment": "Cita",
+      "until": "hasta",
+      "validation": {
+        "required": "Completa la fecha y la hora.",
+        "invalidDateTime": "Introduce una fecha y hora válidas.",
+        "invalidTimeZone": "La zona horaria del plan no es válida.",
+        "nonexistentTime": "Esta hora no existe en la zona horaria del plan debido al cambio de horario. Elige otra.",
+        "ambiguousTime": "Esta hora ocurre dos veces por el cambio de horario. Elige una hora no ambigua.",
+        "invalidWindow": "La hora límite debe ser posterior a la hora de inicio permitida.",
+        "insufficientDuration": "El horario no deja tiempo suficiente para completar este recado."
+      },
+      "errors": {
+        "conflict": "El plan ha cambiado. Recárgalo para actualizar el horario.",
+        "notFound": "Este recado ya no está disponible. Recarga el plan.",
+        "invalid": "El horario no cumple las restricciones. Revisa los datos.",
+        "generic": "No se ha podido guardar el horario. Inténtalo de nuevo."
+      },
+      "combinedWarning": "Al guardar una de estas opciones se sustituirán las restricciones combinadas que tenía este recado."
+    },
+    "comparison": {
+      "title": "Comparación de recorridos",
+      "description": "Descubre cómo cambia tu itinerario al optimizar el orden de los recados.",
+      "original": "Tu orden original",
+      "optimized": "Orden recomendado",
+      "savedTime": "Tiempo ahorrado",
+      "sameTime": "Ambos recorridos tienen la misma duración",
+      "notComparable": "No es posible calcular el ahorro porque no disponemos de dos itinerarios viables.",
+      "totalTime": "Duración total",
+      "finishAt": "Finalización prevista",
+      "notFeasible": "Este orden no cumple las restricciones horarias.",
+      "noOptimized": "No se ha encontrado un itinerario optimizado viable y completo.",
+      "provenOptimal": "El algoritmo ha demostrado que esta solución es óptima.",
+      "searchIncomplete": "La búsqueda no ha terminado. Se muestra la mejor solución encontrada hasta ahora, si existe.",
+      "bestFound": "La búsqueda ha finalizado, pero no se ha demostrado que la solución sea óptima."
     }
   }
 }

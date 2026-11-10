@@ -5,6 +5,7 @@ import {
   type CreateErrandInput,
   type ErrandDto,
   type ErrandMutationResult,
+  type SetErrandScheduleInput,
   type ReorderErrandsInput,
   type ReorderErrandsResult,
   type UpdateErrandInput,
@@ -48,6 +49,18 @@ export class ErrandsApiService {
   reorder(planId: string, body: ReorderErrandsInput): Observable<ReorderErrandsResult> {
     return this.api.apiPlansPlanIdErrandsOrderPut$Json({
       planId,
+      body,
+    });
+  }
+
+  setSchedule(
+    planId: string,
+    errandId: string,
+    body: SetErrandScheduleInput,
+  ): Observable<ErrandMutationResult> {
+    return this.api.apiPlansPlanIdErrandsErrandIdSchedulePut$Json({
+      planId,
+      errandId,
       body,
     });
   }

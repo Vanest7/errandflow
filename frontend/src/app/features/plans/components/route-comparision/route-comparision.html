@@ -1,0 +1,234 @@
+<section
+  *transloco="let t"
+  class="border-t border-[var(--ef-border)] px-6 py-6"
+  aria-labelledby="comparison-heading"
+>
+  <div class="mb-6">
+    <div class="flex items-center gap-3">
+      <span
+        class="material-symbols-outlined text-2xl text-[var(--ef-primary)]"
+        aria-hidden="true"
+      >
+        compare_arrows
+      </span>
+
+      <h3
+        id="comparison-heading"
+        class="text-xl font-bold"
+      >
+        {{ t('plans.comparison.title') }}
+      </h3>
+    </div>
+
+    <p class="mt-2 text-sm text-[var(--ef-text-muted)]">
+      {{ t('plans.comparison.description') }}
+    </p>
+  </div>
+
+  <!-- Time savings -->
+  @if (savedTime() !== null) {
+    <div
+      class="mb-6 rounded-2xl border border-[var(--ef-primary)] bg-[var(--ef-surface-raised)] p-5 text-center"
+      aria-live="polite"
+    >
+      @if (savedTime()! > 0) {
+        <span
+          class="material-symbols-outlined text-4xl text-[var(--ef-primary)]"
+          aria-hidden="true"
+        >
+          savings
+        </span>
+
+        <p class="mt-2 text-sm font-semibold text-[var(--ef-text-muted)]">
+          {{ t('plans.comparison.savedTime') }}
+        </p>
+
+        <p class="mt-2 text-3xl font-bold text-[var(--ef-primary)]">
+          {{ formatDuration(savedTime()) }}
+        </p>
+      } @else {
+        <span
+          class="material-symbols-outlined text-4xl text-[var(--ef-primary)]"
+          aria-hidden="true"
+        >
+          schedule
+        </span>
+
+        <p class="mt-2 font-semibold">
+          {{ t('plans.comparison.sameTime') }}
+        </p>
+      }
+    </div>
+  } @else {
+    <p
+      class="mb-6 rounded-xl bg-[var(--ef-surface-raised)] p-4 text-sm text-[var(--ef-text-muted)]"
+    >
+      {{ t('plans.comparison.notComparable') }}
+    </p>
+  }
+
+  <!-- Comparison cards -->
+  <div class="grid gap-4 md:grid-cols-2">
+
+    <!-- Original route -->
+    <article
+      class="rounded-2xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-5"
+    >
+      <div class="mb-4 flex items-center gap-2">
+        <span
+          class="material-symbols-outlined text-[var(--ef-text-muted)]"
+          aria-hidden="true"
+        >
+          format_list_numbered
+        </span>
+
+        <h4 class="font-bold">
+          {{ t('plans.comparison.original') }}
+        </h4>
+      </div>
+
+      <ol class="space-y-3">
+        @for (
+          errand of originalErrands();
+          track errand.id;
+          let index = $index
+          ) {
+          <li class="flex items-center gap-3">
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--ef-border)] bg-[var(--ef-surface)] text-sm font-semibold"
+            >
+              {{ index + 1 }}
+            </span>
+
+            <span class="min-w-0 break-words text-sm">
+              {{ errand.title }}
+            </span>
+          </li>
+        }
+      </ol>
+
+      <div class="mt-5 border-t border-[var(--ef-border)] pt-4">
+        @if (planning().original.isFeasible) {
+          <p class="text-sm text-[var(--ef-text-muted)]">
+            {{ t('plans.comparison.totalTime') }}
+          </p>
+
+          <p class="mt-1 text-xl font-bold">
+            {{ formatDuration(originalDuration()) }}
+          </p>
+
+          <p class="mt-3 text-sm text-[var(--ef-text-muted)]">
+            {{ t('plans.comparison.finishAt') }}
+          </p>
+
+          <p class="mt-1 font-semibold">
+            {{
+              formatDateTime(
+                planning().original.finishedAtUtc
+              )
+            }}
+          </p>
+        } @else {
+          <p
+            class="flex items-center gap-2 text-sm font-semibold text-[var(--mat-sys-error)]"
+          >
+            <span
+              class="material-symbols-outlined"
+              aria-hidden="true"
+            >
+              warning
+            </span>
+
+            {{ t('plans.comparison.notFeasible') }}
+          </p>
+        }
+      </div>
+    </article>
+
+    <!-- Optimized route -->
+    <article
+      class="rounded-2xl border border-[var(--ef-primary)] bg-[var(--ef-surface)] p-5"
+    >
+      <div class="mb-4 flex items-center gap-2">
+        <span
+          class="material-symbols-outlined text-[var(--ef-primary)]"
+          aria-hidden="true"
+        >
+          route
+        </span>
+
+        <h4 class="font-bold text-[var(--ef-primary)]">
+          {{ t('plans.comparison.optimized') }}
+        </h4>
+      </div>
+
+      @if (optimizedErrands(); as optimized) {
+        <ol class="space-y-3">
+          @for (
+            errand of optimized;
+            track errand.id;
+            let index = $index
+            ) {
+            <li class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--ef-primary)] text-sm font-semibold text-[var(--ef-on-primary)]"
+              >
+                {{ index + 1 }}
+              </span>
+
+              <span class="min-w-0 break-words text-sm font-medium">
+                {{ errand.title }}
+              </span>
+            </li>
+          }
+        </ol>
+
+        <div class="mt-5 border-t border-[var(--ef-border)] pt-4">
+          <p class="text-sm text-[var(--ef-text-muted)]">
+            {{ t('plans.comparison.totalTime') }}
+          </p>
+
+          <p class="mt-1 text-xl font-bold text-[var(--ef-primary)]">
+            {{ formatDuration(optimizedDuration()) }}
+          </p>
+
+          <p class="mt-3 text-sm text-[var(--ef-text-muted)]">
+            {{ t('plans.comparison.finishAt') }}
+          </p>
+
+          <p class="mt-1 font-semibold">
+            {{
+              formatDateTime(
+                planning().optimized?.finishedAtUtc ?? null
+              )
+            }}
+          </p>
+        </div>
+      } @else {
+        <p class="text-sm text-[var(--ef-text-muted)]">
+          {{ t('plans.comparison.noOptimized') }}
+        </p>
+      }
+    </article>
+  </div>
+
+  <!-- Optimization status -->
+  <div
+    class="mt-5 flex items-start gap-2 rounded-xl bg-[var(--ef-surface-raised)] p-4 text-sm text-[var(--ef-text-muted)]"
+  >
+    <span
+      class="material-symbols-outlined text-xl"
+      aria-hidden="true"
+    >
+      info
+    </span>
+
+    @if (planning().isOptimal) {
+      <p>{{ t('plans.comparison.provenOptimal') }}</p>
+    } @else if (!planning().searchCompleted) {
+      <p>{{ t('plans.comparison.searchIncomplete') }}</p>
+    } @else {
+      <p>{{ t('plans.comparison.bestFound') }}</p>
+    }
+  </div>
+</section>

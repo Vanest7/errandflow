@@ -1,0 +1,111 @@
+<form
+  *transloco="let t"
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="mt-4 space-y-4 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface-raised)] p-4"
+>
+  <div>
+    <h4 class="text-lg font-semibold">{{ t('plans.schedule.heading') }}</h4>
+    <p class="mt-1 text-sm text-[var(--ef-text-muted)]">
+      {{ t('plans.schedule.timeZone') }}: {{ timeZone() }}
+    </p>
+  </div>
+
+  <div>
+    <label for="errand-schedule-mode" class="mb-2 block text-sm font-semibold">
+      {{ t('plans.schedule.type') }}
+    </label>
+    <select
+      id="errand-schedule-mode"
+      formControlName="mode"
+      [disabled]="saving()"
+      class="min-h-11 w-full rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] px-3 py-2 text-[var(--ef-text)] transition-colors hover:border-[var(--ef-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)]"
+    >
+      <option value="anytime">{{ t('plans.schedule.anytime') }}</option>
+      <option value="window">{{ t('plans.schedule.window') }}</option>
+      <option value="appointment">{{ t('plans.schedule.appointment') }}</option>
+    </select>
+  </div>
+
+  @if (errand().fixedStartAt && (errand().earliestStartAt || errand().latestFinishAt)) {
+    <p class="rounded-lg border border-[var(--ef-border)] p-3 text-sm text-[var(--ef-text-muted)]">
+      {{ t('plans.schedule.combinedWarning') }}
+    </p>
+  }
+
+  @if (form.controls.mode.value === 'window') {
+    <p class="text-sm text-[var(--ef-text-muted)]">
+      {{ t('plans.schedule.windowHelp') }}
+    </p>
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div>
+        <label for="errand-earliest" class="mb-2 block text-sm font-semibold">
+          {{ t('plans.schedule.earliest') }}
+        </label>
+        <input
+          id="errand-earliest"
+          type="datetime-local"
+          formControlName="earliestLocal"
+          [attr.aria-invalid]="error() !== null"
+          class="min-h-11 w-full min-w-0 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] px-3 py-2 text-[var(--ef-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)]"
+        />
+      </div>
+      <div>
+        <label for="errand-latest" class="mb-2 block text-sm font-semibold">
+          {{ t('plans.schedule.latest') }}
+        </label>
+        <input
+          id="errand-latest"
+          type="datetime-local"
+          formControlName="latestLocal"
+          [attr.aria-invalid]="error() !== null"
+          class="min-h-11 w-full min-w-0 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] px-3 py-2 text-[var(--ef-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)]"
+        />
+      </div>
+    </div>
+  } @else if (form.controls.mode.value === 'appointment') {
+    <p class="text-sm text-[var(--ef-text-muted)]">
+      {{ t('plans.schedule.appointmentHelp') }}
+    </p>
+    <div>
+      <label for="errand-fixed-start" class="mb-2 block text-sm font-semibold">
+        {{ t('plans.schedule.fixedStart') }}
+      </label>
+      <input
+        id="errand-fixed-start"
+        type="datetime-local"
+        formControlName="fixedLocal"
+        [attr.aria-invalid]="error() !== null"
+        class="min-h-11 w-full min-w-0 rounded-xl border border-[var(--ef-border)] bg-[var(--ef-surface)] px-3 py-2 text-[var(--ef-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)]"
+      />
+    </div>
+  } @else {
+    <p class="text-sm text-[var(--ef-text-muted)]">
+      {{ t('plans.schedule.anytimeHelp') }}
+    </p>
+  }
+
+  @if (error(); as validationError) {
+    <p role="alert" class="text-sm text-[var(--mat-sys-error)]">
+      {{ t('plans.schedule.validation.' + validationError) }}
+    </p>
+  }
+
+  <div class="flex flex-wrap justify-end gap-3 border-t border-[var(--ef-border)] pt-4">
+    <button
+      type="button"
+      [disabled]="saving()"
+      (click)="cancelled.emit()"
+      class="min-h-11 rounded-xl border border-[var(--ef-border)] px-4 font-semibold transition-colors hover:bg-[var(--ef-surface)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] disabled:opacity-50"
+    >
+      {{ t('common.cancel') }}
+    </button>
+    <button
+      type="submit"
+      [disabled]="saving()"
+      class="min-h-11 rounded-xl bg-[var(--ef-primary)] px-4 font-semibold text-[var(--ef-on-primary)] transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] disabled:opacity-50"
+    >
+      {{ saving() ? t('plans.schedule.saving') : t('plans.schedule.save') }}
+    </button>
+  </div>
+</form>

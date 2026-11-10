@@ -224,6 +224,59 @@
       "totalDuration": "Total plan duration",
       "unknownErrand": "Unknown errand",
       "unknownLocation": "Location unavailable"
+    },
+    "schedule": {
+      "heading": "Errand schedule",
+      "type": "When can you do it?",
+      "timeZone": "Time zone",
+      "anytime": "No restrictions",
+      "window": "Within a time window",
+      "appointment": "Fixed appointment",
+      "anytimeHelp": "The errand can be completed whenever it best fits the itinerary.",
+      "windowHelp": "You may start at or after the earliest time and must finish by the latest time. The errand duration is taken into account.",
+      "appointmentHelp": "The errand must start at this exact time. Arriving early will add waiting time to the itinerary.",
+      "earliest": "Earliest allowed start",
+      "latest": "Must finish by",
+      "fixedStart": "Appointment time",
+      "save": "Save schedule",
+      "saving": "Saving schedule…",
+      "edit": "Schedule",
+      "currentAnytime": "No schedule set",
+      "currentWindow": "Allowed time window",
+      "currentAppointment": "Appointment",
+      "until": "until",
+      "validation": {
+        "required": "Enter a date and time.",
+        "invalidDateTime": "Enter a valid date and time.",
+        "invalidTimeZone": "The plan time zone is invalid.",
+        "nonexistentTime": "This time does not exist in the plan time zone due to a daylight-saving change. Choose another time.",
+        "ambiguousTime": "This time occurs twice due to a daylight-saving change. Choose an unambiguous time.",
+        "invalidWindow": "The latest finish must be after the earliest start.",
+        "insufficientDuration": "The time window is too short for this errand."
+      },
+      "errors": {
+        "conflict": "The plan has changed. Reload it before updating the schedule.",
+        "notFound": "This errand is no longer available. Reload the plan.",
+        "invalid": "The schedule violates the allowed constraints. Check the values.",
+        "generic": "Could not save the schedule. Please try again."
+      },
+      "combinedWarning": "Saving one of these options will replace the combined constraints currently set for this errand."
+    },
+    "comparison": {
+      "title": "Route comparison",
+      "description": "See how your itinerary changes when the order of errands is optimized.",
+      "original": "Your original order",
+      "optimized": "Recommended order",
+      "savedTime": "Time saved",
+      "sameTime": "Both routes have the same duration",
+      "notComparable": "Time savings cannot be calculated because two feasible itineraries are not available.",
+      "totalTime": "Total duration",
+      "finishAt": "Estimated finish",
+      "notFeasible": "This order does not satisfy the time constraints.",
+      "noOptimized": "No feasible and complete optimized itinerary was found.",
+      "provenOptimal": "The algorithm has proven that this solution is optimal.",
+      "searchIncomplete": "The search has not finished. The best solution found so far is shown, if available.",
+      "bestFound": "The search has finished, but the solution has not been proven optimal."
     }
   }
 }

@@ -46,6 +46,7 @@ import {
   type EndpointSelection,
 } from '../../components/plan-endpoint-picker/plan-endpoint-picker';
 
+import { ErrandScheduleForm } from '../../components/errand-schedule-form/errand-schedule-form';
 import { ErrandsApiService } from '../../data-access/errands-api.service';
 import { LocationsApiService } from '../../data-access/location-api.service';
 import { PlansApiService } from '../../data-access/plans-api.service';
@@ -57,14 +58,16 @@ import type { MapCoordinates } from '../../../../shared/map/models/map-coordinat
 import type { MapStop } from '../../../../shared/map/models/map-stop.model';
 import { PlanRouteApiService } from '../../data-access/plan-route-api.service';
 import { mapRoutePath } from '../../utils/map-route-path';
+import { formatScheduleDateTime, type SchedulePayload } from '../../utils/errand-schedule-time';
 import { moveErrandIdsToIndex } from '../../utils/reorder-errands';
+import { RouteComparison } from '../../components/route-comparision/route-comparision';
 
 type MapPickTarget = 'errand' | EndpointKind;
 type EndpointError = 'conflict' | 'generic' | 'notAssigned';
 
 @Component({
   selector: 'app-plan-editor',
-  imports: [CdkDrag, CdkDragHandle, CdkDropList, RouterLink, TranslocoDirective, ErrandForm, PlanEndpointPicker, RouteMap],
+  imports: [CdkDrag, CdkDragHandle, CdkDropList, RouterLink, TranslocoDirective, ErrandForm, ErrandScheduleForm, PlanEndpointPicker, RouteMap, RouteComparison],
   templateUrl: './plan-editor.html',
 })
 export class PlanEditor {
@@ -115,6 +118,10 @@ export class PlanEditor {
   protected readonly createError = signal<'conflict' | 'generic' | null>(null);
 
   protected readonly editingErrandId = signal<string | null>(null);
+  protected readonly schedulingErrandId = signal<string | null>(null);
+  protected readonly savingSchedule = signal(false);
+  protected readonly scheduleError = signal<'conflict' | 'notFound' | 'invalid' | 'generic' | null>(null);
+
   protected readonly savingEditedErrand = signal(false);
   protected readonly confirmingDeleteId = signal<string | null>(null);
   protected readonly deletingErrandId = signal<string | null>(null);
@@ -124,6 +131,8 @@ export class PlanEditor {
   protected readonly errandMutationBusy = computed(() =>
     this.savingErrand() ||
     this.savingEditedErrand() ||
+    this.savingSchedule() ||
+    this.schedulingErrandId() !== null ||
     this.deletingErrandId() !== null ||
     this.reorderingErrands(),
   );
@@ -261,6 +270,8 @@ export class PlanEditor {
 
           this.resetEndpointEditor();
           this.editingErrandId.set(null);
+          this.schedulingErrandId.set(null);
+          this.scheduleError.set(null);
           this.confirmingDeleteId.set(null);
           this.errandMutationError.set(null);
           this.mapPoint.set(null);
@@ -649,6 +660,79 @@ export class PlanEditor {
         },
         error: (error: unknown) => this.handleErrandMutationError(error),
       });
+  }
+
+  protected openErrandSchedule(errandId: string): void {
+    if (
+      this.errandMutationBusy() || this.creatingErrand() ||
+      this.editingEndpoint() !== null || this.editingErrandId() !== null ||
+      this.confirmingDeleteId() !== null || this.savingEndpoint() ||
+      this.errandMutationError() === 'conflict'
+    ) {
+      return;
+    }
+
+    this.schedulingErrandId.set(errandId);
+    this.scheduleError.set(null);
+  }
+
+  protected cancelErrandSchedule(): void {
+    if (this.savingSchedule()) {
+      return;
+    }
+
+    this.schedulingErrandId.set(null);
+    this.scheduleError.set(null);
+  }
+
+  protected saveErrandSchedule(value: SchedulePayload): void {
+    const currentPlan = this.plan();
+    const errandId = this.schedulingErrandId();
+
+    if (!currentPlan || !errandId || this.savingSchedule()) {
+      return;
+    }
+
+    this.savingSchedule.set(true);
+    this.scheduleError.set(null);
+
+    this.errandsApi.setSchedule(currentPlan.id, errandId, {
+      ...value,
+      expectedRevision: currentPlan.revision,
+    })
+      .pipe(
+        finalize(() => this.savingSchedule.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (result) => {
+          this.invalidateRoute();
+          this.errands.update((errands) => errands.map((errand) =>
+            errand.id === errandId ? result.errand : errand,
+          ));
+          this.plan.update((plan) => plan
+            ? { ...plan, revision: result.planRevision }
+            : plan,
+          );
+          this.schedulingErrandId.set(null);
+        },
+        error: (error: unknown) => {
+          const status = error instanceof HttpErrorResponse ? error.status : 0;
+          this.scheduleError.set(
+            status === 409 ? 'conflict' :
+            status === 404 ? 'notFound' :
+            status === 400 ? 'invalid' : 'generic',
+          );
+        },
+      });
+  }
+
+  protected formatErrandScheduleTime(value: string, timeZone: string): string {
+    return formatScheduleDateTime(
+      value,
+      timeZone,
+      this.language.activeLanguage() as SupportedLanguage,
+    );
   }
 
   private handleErrandMutationError(error: unknown): void {
