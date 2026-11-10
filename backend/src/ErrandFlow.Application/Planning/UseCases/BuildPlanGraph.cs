@@ -36,12 +36,12 @@ public sealed class BuildPlanGraph
                 nameof(planId));
         }
 
-        if (travelMode != TravelMode.Walking)
-            {
-                throw new ArgumentException(
-                    "Only walking routes are currently supported.",
-                    nameof(travelMode));
-            }
+        if (travelMode is not (TravelMode.Walking or TravelMode.Driving))
+        {
+            throw new ArgumentException(
+                "Only walking and driving routes are currently supported.",
+                nameof(travelMode));
+        }
 
         var snapshot = await _repository.GetSnapshotAsync(
             ownerId,

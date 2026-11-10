@@ -38,10 +38,10 @@ public sealed class OptimizePlan
                 nameof(planId));
         }
 
-        if (travelMode != TravelMode.Walking)
+        if (travelMode is not (TravelMode.Walking or TravelMode.Driving))
         {
             throw new ArgumentException(
-                "Only walking routes are currently supported.",
+                "Only walking and driving routes are currently supported.",
                 nameof(travelMode));
         }
 

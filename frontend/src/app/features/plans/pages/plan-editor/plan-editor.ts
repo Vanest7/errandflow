@@ -56,7 +56,7 @@ import { formatPlanDate } from '../../utils/format-plan-date';
 import { RouteMap } from '../../../../shared/map/components/route-map/route-map';
 import type { MapCoordinates } from '../../../../shared/map/models/map-coordinates';
 import type { MapStop } from '../../../../shared/map/models/map-stop.model';
-import { PlanRouteApiService } from '../../data-access/plan-route-api.service';
+import { PlanRouteApiService, SupportedTravelMode } from '../../data-access/plan-route-api.service';
 import { mapRoutePath } from '../../utils/map-route-path';
 import { formatScheduleDateTime, type SchedulePayload } from '../../utils/errand-schedule-time';
 import { moveErrandIdsToIndex } from '../../utils/reorder-errands';
@@ -67,7 +67,18 @@ type EndpointError = 'conflict' | 'generic' | 'notAssigned';
 
 @Component({
   selector: 'app-plan-editor',
-  imports: [CdkDrag, CdkDragHandle, CdkDropList, RouterLink, TranslocoDirective, ErrandForm, ErrandScheduleForm, PlanEndpointPicker, RouteMap, RouteComparison],
+  imports: [
+    CdkDrag,
+    CdkDragHandle,
+    CdkDropList,
+    RouterLink,
+    TranslocoDirective,
+    ErrandForm,
+    ErrandScheduleForm,
+    PlanEndpointPicker,
+    RouteMap,
+    RouteComparison,
+  ],
   templateUrl: './plan-editor.html',
 })
 export class PlanEditor {
@@ -88,6 +99,8 @@ export class PlanEditor {
   private readonly routeApi = inject(PlanRouteApiService);
 
   private readonly routeInvalidated$ = new Subject<void>();
+
+  protected readonly travelMode = signal<SupportedTravelMode>(1);
 
   protected readonly calculatingRoute = signal(false);
 
@@ -120,7 +133,9 @@ export class PlanEditor {
   protected readonly editingErrandId = signal<string | null>(null);
   protected readonly schedulingErrandId = signal<string | null>(null);
   protected readonly savingSchedule = signal(false);
-  protected readonly scheduleError = signal<'conflict' | 'notFound' | 'invalid' | 'generic' | null>(null);
+  protected readonly scheduleError = signal<'conflict' | 'notFound' | 'invalid' | 'generic' | null>(
+    null,
+  );
 
   protected readonly savingEditedErrand = signal(false);
   protected readonly confirmingDeleteId = signal<string | null>(null);
@@ -128,29 +143,29 @@ export class PlanEditor {
   protected readonly reorderingErrands = signal(false);
   protected readonly errandMutationError = signal<'conflict' | 'notFound' | 'generic' | null>(null);
 
-  protected readonly errandMutationBusy = computed(() =>
-    this.savingErrand() ||
-    this.savingEditedErrand() ||
-    this.savingSchedule() ||
-    this.schedulingErrandId() !== null ||
-    this.deletingErrandId() !== null ||
-    this.reorderingErrands(),
+  protected readonly errandMutationBusy = computed(
+    () =>
+      this.savingErrand() ||
+      this.savingEditedErrand() ||
+      this.savingSchedule() ||
+      this.schedulingErrandId() !== null ||
+      this.deletingErrandId() !== null ||
+      this.reorderingErrands(),
   );
 
   protected readonly originalOrderErrands = computed(() =>
-    [...this.errands()].sort(
-      (a, b) => Number(a.originalPosition) - Number(b.originalPosition),
-    ),
+    [...this.errands()].sort((a, b) => Number(a.originalPosition) - Number(b.originalPosition)),
   );
 
-  protected readonly canReorderErrands = computed(() =>
-    !this.errandMutationBusy() &&
-    !this.creatingErrand() &&
-    this.editingErrandId() === null &&
-    this.confirmingDeleteId() === null &&
-    this.editingEndpoint() === null &&
-    !this.savingEndpoint() &&
-    this.errandMutationError() !== 'conflict'
+  protected readonly canReorderErrands = computed(
+    () =>
+      !this.errandMutationBusy() &&
+      !this.creatingErrand() &&
+      this.editingErrandId() === null &&
+      this.confirmingDeleteId() === null &&
+      this.editingEndpoint() === null &&
+      !this.savingEndpoint() &&
+      this.errandMutationError() !== 'conflict',
   );
 
   protected readonly editingEndpoint = signal<EndpointKind | null>(null);
@@ -328,8 +343,10 @@ export class PlanEditor {
 
   protected startAddingErrand(): void {
     if (
-      this.savingEndpoint() || this.errandMutationBusy() ||
-      this.editingErrandId() !== null || this.confirmingDeleteId() !== null ||
+      this.savingEndpoint() ||
+      this.errandMutationBusy() ||
+      this.editingErrandId() !== null ||
+      this.confirmingDeleteId() !== null ||
       this.editingEndpoint() !== null
     ) {
       return;
@@ -388,8 +405,10 @@ export class PlanEditor {
 
   protected beginEndpointEdit(kind: EndpointKind): void {
     if (
-      this.creatingErrand() || this.errandMutationBusy() ||
-      this.editingErrandId() !== null || this.confirmingDeleteId() !== null ||
+      this.creatingErrand() ||
+      this.errandMutationBusy() ||
+      this.editingErrandId() !== null ||
+      this.confirmingDeleteId() !== null ||
       this.savingEndpoint()
     ) {
       return;
@@ -413,8 +432,11 @@ export class PlanEditor {
     const target = this.editingEndpoint();
 
     if (
-      !currentPlan || !target || this.savingEndpoint() ||
-      this.errandMutationBusy() || this.editingErrandId() !== null
+      !currentPlan ||
+      !target ||
+      this.savingEndpoint() ||
+      this.errandMutationBusy() ||
+      this.editingErrandId() !== null
     ) {
       return;
     }
@@ -483,8 +505,10 @@ export class PlanEditor {
 
   protected startEditingErrand(errand: ErrandDto): void {
     if (
-      this.errandMutationBusy() || this.creatingErrand() ||
-      this.editingEndpoint() !== null || this.savingEndpoint() ||
+      this.errandMutationBusy() ||
+      this.creatingErrand() ||
+      this.editingEndpoint() !== null ||
+      this.savingEndpoint() ||
       this.errandMutationError() === 'conflict'
     ) {
       return;
@@ -517,21 +541,23 @@ export class PlanEditor {
       return;
     }
 
-    const location = value.location.type === 'new'
-      ? { newLocation: value.location.newLocation }
-      : { locationId: value.location.locationId };
+    const location =
+      value.location.type === 'new'
+        ? { newLocation: value.location.newLocation }
+        : { locationId: value.location.locationId };
 
     this.invalidateRoute();
     this.errandMutationError.set(null);
     this.savingEditedErrand.set(true);
     this.mapPickTarget.set(null);
 
-    this.errandsApi.update(currentPlan.id, errandId, {
-      title: value.title,
-      durationMinutes: value.durationMinutes,
-      expectedRevision: currentPlan.revision,
-      ...location,
-    })
+    this.errandsApi
+      .update(currentPlan.id, errandId, {
+        title: value.title,
+        durationMinutes: value.durationMinutes,
+        expectedRevision: currentPlan.revision,
+        ...location,
+      })
       .pipe(
         finalize(() => this.savingEditedErrand.set(false)),
         takeUntilDestroyed(this.destroyRef),
@@ -548,9 +574,12 @@ export class PlanEditor {
 
   protected askDeleteErrand(errandId: string): void {
     if (
-      this.errandMutationBusy() || this.editingErrandId() !== null ||
-      this.creatingErrand() || this.editingEndpoint() !== null ||
-      this.savingEndpoint() || this.errandMutationError() === 'conflict'
+      this.errandMutationBusy() ||
+      this.editingErrandId() !== null ||
+      this.creatingErrand() ||
+      this.editingEndpoint() !== null ||
+      this.savingEndpoint() ||
+      this.errandMutationError() === 'conflict'
     ) {
       return;
     }
@@ -568,10 +597,7 @@ export class PlanEditor {
 
   protected deleteErrand(errandId: string): void {
     const currentPlan = this.plan();
-    if (
-      !currentPlan || this.confirmingDeleteId() !== errandId ||
-      this.errandMutationBusy()
-    ) {
+    if (!currentPlan || this.confirmingDeleteId() !== errandId || this.errandMutationBusy()) {
       return;
     }
 
@@ -579,7 +605,8 @@ export class PlanEditor {
     this.errandMutationError.set(null);
     this.deletingErrandId.set(errandId);
 
-    this.errandsApi.delete(currentPlan.id, errandId, currentPlan.revision)
+    this.errandsApi
+      .delete(currentPlan.id, errandId, currentPlan.revision)
       .pipe(
         finalize(() => this.deletingErrandId.set(null)),
         takeUntilDestroyed(this.destroyRef),
@@ -593,9 +620,7 @@ export class PlanEditor {
       });
   }
 
-  protected onErrandDropped(
-    event: CdkDragDrop<ErrandDto[]>,
-  ): void {
+  protected onErrandDropped(event: CdkDragDrop<ErrandDto[]>): void {
     if (!this.canReorderErrands()) {
       return;
     }
@@ -615,9 +640,7 @@ export class PlanEditor {
 
     this.changeErrandPosition(errandId, targetIndex);
 
-    const originalIndex = this.originalOrderErrands().findIndex(
-      (errand) => errand.id === errandId,
-    );
+    const originalIndex = this.originalOrderErrands().findIndex((errand) => errand.id === errandId);
     select.value = String(originalIndex + 1);
   }
 
@@ -628,11 +651,7 @@ export class PlanEditor {
       return;
     }
 
-    const errandIds = moveErrandIdsToIndex(
-      this.originalOrderErrands(),
-      errandId,
-      targetIndex,
-    );
+    const errandIds = moveErrandIdsToIndex(this.originalOrderErrands(), errandId, targetIndex);
 
     if (!errandIds) {
       return;
@@ -642,10 +661,11 @@ export class PlanEditor {
     this.errandMutationError.set(null);
     this.reorderingErrands.set(true);
 
-    this.errandsApi.reorder(currentPlan.id, {
-      expectedRevision: currentPlan.revision,
-      errandIds,
-    })
+    this.errandsApi
+      .reorder(currentPlan.id, {
+        expectedRevision: currentPlan.revision,
+        errandIds,
+      })
       .pipe(
         finalize(() => this.reorderingErrands.set(false)),
         takeUntilDestroyed(this.destroyRef),
@@ -653,10 +673,7 @@ export class PlanEditor {
       .subscribe({
         next: (result) => {
           this.errands.set(result.errands);
-          this.plan.update((plan) => plan
-            ? { ...plan, revision: result.planRevision }
-            : plan,
-          );
+          this.plan.update((plan) => (plan ? { ...plan, revision: result.planRevision } : plan));
         },
         error: (error: unknown) => this.handleErrandMutationError(error),
       });
@@ -664,9 +681,12 @@ export class PlanEditor {
 
   protected openErrandSchedule(errandId: string): void {
     if (
-      this.errandMutationBusy() || this.creatingErrand() ||
-      this.editingEndpoint() !== null || this.editingErrandId() !== null ||
-      this.confirmingDeleteId() !== null || this.savingEndpoint() ||
+      this.errandMutationBusy() ||
+      this.creatingErrand() ||
+      this.editingEndpoint() !== null ||
+      this.editingErrandId() !== null ||
+      this.confirmingDeleteId() !== null ||
+      this.savingEndpoint() ||
       this.errandMutationError() === 'conflict'
     ) {
       return;
@@ -696,10 +716,11 @@ export class PlanEditor {
     this.savingSchedule.set(true);
     this.scheduleError.set(null);
 
-    this.errandsApi.setSchedule(currentPlan.id, errandId, {
-      ...value,
-      expectedRevision: currentPlan.revision,
-    })
+    this.errandsApi
+      .setSchedule(currentPlan.id, errandId, {
+        ...value,
+        expectedRevision: currentPlan.revision,
+      })
       .pipe(
         finalize(() => this.savingSchedule.set(false)),
         takeUntilDestroyed(this.destroyRef),
@@ -707,21 +728,22 @@ export class PlanEditor {
       .subscribe({
         next: (result) => {
           this.invalidateRoute();
-          this.errands.update((errands) => errands.map((errand) =>
-            errand.id === errandId ? result.errand : errand,
-          ));
-          this.plan.update((plan) => plan
-            ? { ...plan, revision: result.planRevision }
-            : plan,
+          this.errands.update((errands) =>
+            errands.map((errand) => (errand.id === errandId ? result.errand : errand)),
           );
+          this.plan.update((plan) => (plan ? { ...plan, revision: result.planRevision } : plan));
           this.schedulingErrandId.set(null);
         },
         error: (error: unknown) => {
           const status = error instanceof HttpErrorResponse ? error.status : 0;
           this.scheduleError.set(
-            status === 409 ? 'conflict' :
-            status === 404 ? 'notFound' :
-            status === 400 ? 'invalid' : 'generic',
+            status === 409
+              ? 'conflict'
+              : status === 404
+                ? 'notFound'
+                : status === 400
+                  ? 'invalid'
+                  : 'generic',
           );
         },
       });
@@ -854,8 +876,10 @@ export class PlanEditor {
     this.invalidateRoute();
     this.calculatingRoute.set(true);
 
+    const selectedTravelMode = this.travelMode();
+
     this.routeApi
-      .getOptimizedRoute(currentPlan.id)
+      .getOptimizedRoute(currentPlan.id, selectedTravelMode)
       .pipe(
         takeUntil(this.routeInvalidated$),
         takeUntilDestroyed(this.destroyRef),
@@ -869,7 +893,10 @@ export class PlanEditor {
             !activePlan ||
             activePlan.id !== currentPlan.id ||
             String(activePlan.revision) !== String(currentPlan.revision) ||
-            String(result.planning.original.revision) !== String(currentPlan.revision)
+            String(result.planning.original.revision) !== String(currentPlan.revision) ||
+            String(result.planning.original.revision) !== String(currentPlan.revision) ||
+            result.planning.original.travelMode !==
+            (selectedTravelMode === 1 ? 'Walking' : 'Driving')
           ) {
             this.routeError.set('conflict');
             return;
@@ -927,6 +954,15 @@ export class PlanEditor {
     const locale = this.language.activeLanguage() as SupportedLanguage;
 
     return new Intl.NumberFormat(locale).format(Math.ceil(seconds / 60));
+  }
+
+  protected setTravelMode(mode: SupportedTravelMode): void {
+    if (this.travelMode() === mode) {
+      return;
+    }
+
+    this.travelMode.set(mode);
+    this.invalidateRoute();
   }
 
   private invalidateRoute(): void {

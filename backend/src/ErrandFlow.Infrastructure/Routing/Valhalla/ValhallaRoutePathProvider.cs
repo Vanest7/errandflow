@@ -29,10 +29,10 @@ public async Task<RoutePathDto> BuildAsync(
 
     cancellationToken.ThrowIfCancellationRequested();
 
-    if (travelMode != TravelMode.Walking)
+    if (travelMode is not (TravelMode.Walking or TravelMode.Driving))
     {
         throw new ArgumentException(
-            "Only walking routes are currently supported.",
+            "Only walking and driving routes are currently supported.",
             nameof(travelMode));
     }
 
@@ -81,10 +81,10 @@ public async Task<RoutePathDto> BuildAsync(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (travelMode != TravelMode.Walking)
+        if (travelMode is not (TravelMode.Walking or TravelMode.Driving))
         {
             throw new ArgumentException(
-                "Only walking routes are currently supported.",
+                "Only walking and driving routes are currently supported.",
                 nameof(travelMode));
         }
 
@@ -97,6 +97,15 @@ public async Task<RoutePathDto> BuildAsync(
             return new RoutePathDto(Array.Empty<RouteLegDto>());
         }
 
+        var costing = travelMode switch
+        {
+            TravelMode.Walking => "pedestrian",
+            TravelMode.Driving => "auto",
+            _ => throw new ArgumentException(
+                "Unsupported travel mode.",
+                nameof(travelMode))
+        };
+
         var request = new
         {
             locations = stops.Select(stop => new
@@ -105,7 +114,7 @@ public async Task<RoutePathDto> BuildAsync(
                 lon = stop.Longitude,
                 type = "break"
             }).ToArray(),
-            costing = "pedestrian",
+            costing,
             units = "kilometers"
         };
 

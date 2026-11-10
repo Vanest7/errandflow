@@ -32,8 +32,9 @@ public sealed class ValhallaTravelGraphProvider : ITravelGraphProvider
     var costing = travelMode switch
     {
         TravelMode.Walking => "pedestrian",
+        TravelMode.Driving => "auto",
         _ => throw new ArgumentException(
-            "Only walking routes are currently supported.",
+            "Unsupported travel mode.",
             nameof(travelMode))
     };
 

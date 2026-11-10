@@ -197,6 +197,11 @@
       "scheduleWarning": "El recorrido por las calles se ha calculado, pero los horarios de este plan no son viables según los tiempos reales de desplazamiento.",
       "provenInfeasible": "No existe un orden de visita viable con las condiciones actuales del plan.",
       "noRouteFound": "No se ha encontrado un recorrido viable. Esto no demuestra que sea imposible realizar el plan.",
+      "travelMode": "¿Cómo vas a desplazarte?",
+      "walkingOption": "A pie",
+      "drivingOption": "En coche",
+      "driving": "Recorrido en coche",
+      "drivingTime": "Tiempo conduciendo",
       "errors": {
         "conflict": "El plan ha cambiado durante el cálculo. Recárgalo antes de continuar.",
         "unavailable": "El servicio de rutas no está disponible en este momento. Inténtalo de nuevo.",

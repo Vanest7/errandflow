@@ -554,7 +554,11 @@
           <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p class="font-semibold">
-                {{ t('plans.route.walking') }}
+                {{
+                  travelMode() === 1
+                    ? t('plans.route.walking')
+                    : t('plans.route.driving')
+                }}
               </p>
 
               <p class="mt-1 text-sm text-[var(--ef-text-muted)]">
@@ -592,6 +596,50 @@
                   : t('plans.route.calculate')
               }}
             </button>
+          </div>
+          <!-- Travel mode selection -->
+          <div class="mt-5">
+            <p class="mb-2 text-sm font-semibold text-[var(--ef-text-muted)]">
+              {{ t('plans.route.travelMode') }}
+            </p>
+
+            <div
+              role="group"
+              [attr.aria-label]="t('plans.route.travelMode')"
+              class="grid grid-cols-2 gap-2 rounded-xl bg-[var(--ef-surface-raised)] p-1"
+            >
+              <button
+                type="button"
+                [attr.aria-pressed]="travelMode() === 1"
+                (click)="setTravelMode(1)"
+                class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] aria-pressed:bg-[var(--ef-primary)] aria-pressed:text-[var(--ef-on-primary)] aria-pressed:shadow-sm"
+              >
+      <span
+        class="material-symbols-outlined text-xl"
+        aria-hidden="true"
+      >
+        directions_walk
+      </span>
+
+                {{ t('plans.route.walkingOption') }}
+              </button>
+
+              <button
+                type="button"
+                [attr.aria-pressed]="travelMode() === 3"
+                (click)="setTravelMode(3)"
+                class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ef-primary)] aria-pressed:bg-[var(--ef-primary)] aria-pressed:text-[var(--ef-on-primary)] aria-pressed:shadow-sm"
+              >
+      <span
+        class="material-symbols-outlined text-xl"
+        aria-hidden="true"
+      >
+        directions_car
+      </span>
+
+                {{ t('plans.route.drivingOption') }}
+              </button>
+            </div>
           </div>
 
           <!-- Requirements -->
@@ -669,7 +717,11 @@
 
                 <div>
                   <dt class="text-sm text-[var(--ef-text-muted)]">
-                    {{ t('plans.route.travelTime') }}
+                    {{
+                      travelMode() === 1
+                        ? t('plans.route.travelTime')
+                        : t('plans.route.drivingTime')
+                    }}
                   </dt>
 
                   <dd class="mt-1 text-xl font-bold text-[var(--ef-primary)]">

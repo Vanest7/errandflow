@@ -197,6 +197,11 @@
       "scheduleWarning": "The street route was calculated, but the plan schedule is not feasible using the actual travel times.",
       "provenInfeasible": "No feasible visit order exists under the current plan constraints.",
       "noRouteFound": "No feasible route was found. This does not prove that completing the plan is impossible.",
+      "travelMode": "How will you travel?",
+      "walkingOption": "Walking",
+      "drivingOption": "By car",
+      "driving": "Driving route",
+      "drivingTime": "Driving time",
       "errors": {
         "conflict": "The plan changed during calculation. Reload it before continuing.",
         "unavailable": "The routing service is temporarily unavailable. Please try again.",

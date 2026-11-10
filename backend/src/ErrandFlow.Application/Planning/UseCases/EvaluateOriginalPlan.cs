@@ -39,12 +39,12 @@ public sealed class EvaluateOriginalPlan
                 nameof(planId));
         }
 
-        if (travelMode != TravelMode.Walking)
-        {
-            throw new ArgumentException(
-                "Only walking routes are currently supported.",
-                nameof(travelMode));
-        }
+       if (travelMode is not (TravelMode.Walking or TravelMode.Driving))
+       {
+           throw new ArgumentException(
+               "Only walking and driving routes are currently supported.",
+               nameof(travelMode));
+       }
 
         var plan = await _planRepository.GetWithErrandsAsync(
             ownerId,

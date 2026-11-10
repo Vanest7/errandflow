@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ErrandFlow.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1b8b1ed427212b29f19322cd0b3ae00bb57eb3cd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+946d7161de8e2b7f1b6ed6741edc6fe3d1b9aaa7")]
 [assembly: System.Reflection.AssemblyProductAttribute("ErrandFlow.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ErrandFlow.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
