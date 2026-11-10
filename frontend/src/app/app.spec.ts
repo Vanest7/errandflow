@@ -1,9 +1,16 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { provideTransloco } from '@jsverse/transloco';
+import { Translation, TranslocoLoader, provideTransloco } from '@jsverse/transloco';
 import { App } from './app';
 import { AuthFacade } from './core/auth/auth.facade';
+import { ThemeService } from './core/theme/theme.service';
+
+class TestTranslocoLoader implements TranslocoLoader {
+  getTranslation() {
+    return Promise.resolve<Translation>({ app: { welcome: 'Bienvenido' } });
+  }
+}
 
 describe('App', () => {
   beforeEach(async () => {
@@ -17,9 +24,7 @@ describe('App', () => {
             defaultLang: 'es',
             fallbackLang: 'es',
           },
-          loader: {
-            getTranslation: () => Promise.resolve({ app: { welcome: 'Bienvenido' } }),
-          },
+          loader: TestTranslocoLoader,
         }),
         {
           provide: AuthFacade,
@@ -35,6 +40,16 @@ describe('App', () => {
             logout: () => undefined,
             refreshIdentity: () => undefined,
             retryProfileSynchronization: () => undefined,
+          },
+        },
+        {
+          provide: ThemeService,
+          useValue: {
+            activeTheme: signal('light'),
+            isDark: signal(false),
+            setTheme: () => undefined,
+            toggleTheme: () => undefined,
+            useSystemTheme: () => undefined,
           },
         },
       ],

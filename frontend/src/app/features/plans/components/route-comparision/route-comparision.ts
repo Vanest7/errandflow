@@ -49,7 +49,9 @@ export class RouteComparison {
       return null;
     }
 
-    return orderedIds.map((id) => errandsById.get(id)!);
+    return orderedIds
+      .map((id) => errandsById.get(id))
+      .filter((errand): errand is ErrandDto => errand !== undefined);
   });
 
   protected readonly originalDuration = computed(() =>
