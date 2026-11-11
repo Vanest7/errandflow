@@ -182,7 +182,6 @@ The Docker startup builds the application images; it does not run the complete t
 ```text
 errandflow/
 ├── README.md
-├── DEMO_SETUP.md
 ├── run_demo.py                  # One-command local demo launcher
 ├── docker-compose.demo.yml     # MariaDB, HTTPS API, and web server
 ├── docker/
