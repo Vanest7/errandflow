@@ -74,6 +74,7 @@
   }
 
   <!-- Search area -->
+  @if (!mapSelectionActive()) {
   <div>
     <label
       for="errand-area"
@@ -186,9 +187,11 @@
       © OpenStreetMap contributors
     </p>
   </div>
+  }
 
   <!-- Place search -->
   <div>
+    @if (!mapSelectionActive()) {
     <label for="errand-place" class="mb-2 block text-sm font-semibold">
       {{ t('plans.errandForm.place') }}
     </label>
@@ -241,11 +244,15 @@
       </p>
     }
 
+    }
+
     <!-- Manual map selection -->
     <div class="mt-5 border-t border-[var(--ef-border)] pt-5">
-      <p class="mb-3 text-sm text-[var(--ef-text-muted)]">
-        {{ t('plans.errandForm.mapPickHelp') }}
-      </p>
+      @if (!mapSelectionActive() || pickingOnMap()) {
+        <p class="mb-3 text-sm text-[var(--ef-text-muted)]" aria-live="polite">
+          {{ pickingOnMap() ? t('plans.errandForm.pickingOnMap') : t('plans.errandForm.mapPickHelp') }}
+        </p>
+      }
 
       <button
         type="button"
@@ -257,12 +264,12 @@
       class="material-symbols-outlined"
       aria-hidden="true"
     >
-      location_on
+      {{ mapSelectionActive() ? 'close' : 'location_on' }}
     </span>
 
         {{
-          pickingOnMap()
-            ? t('plans.errandForm.pickingOnMap')
+          mapSelectionActive()
+            ? t('plans.errandForm.cancelMapSelection')
             : t('plans.errandForm.chooseOnMap')
         }}
       </button>
@@ -319,6 +326,7 @@
       }
     </div>
 
+    @if (!mapSelectionActive()) {
     <!-- Search results -->
     @if (results().length > 0) {
       <ul
@@ -364,6 +372,7 @@
         OpenStreetMap contributors
       </a>
     </p>
+    }
   </div>
 
   <!-- Actions -->

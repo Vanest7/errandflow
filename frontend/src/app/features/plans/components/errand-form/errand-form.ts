@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, effect, inject, input, model, output, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, input, model, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoDirective } from '@jsverse/transloco';
@@ -46,6 +46,7 @@ export class ErrandForm {
   readonly mapPoint = model<MapCoordinates | null>(null);
 
   readonly pickingOnMap = input(false);
+  readonly mapSelectionActive = computed(() => this.pickingOnMap() || this.mapPoint() !== null);
 
   readonly pickOnMap = output<void>();
   readonly stopPicking = output<void>();
@@ -186,6 +187,12 @@ export class ErrandForm {
 
   chooseOnMap(): void {
     if (this.saving()) {
+      return;
+    }
+
+    if (this.mapSelectionActive()) {
+      this.mapPoint.set(null);
+      this.stopPicking.emit();
       return;
     }
 

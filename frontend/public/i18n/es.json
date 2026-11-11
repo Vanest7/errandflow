@@ -135,6 +135,7 @@
       "selectAreaFirst": "Selecciona primero una zona de búsqueda.",
       "chooseOnMap": "Elegir en el mapa",
       "pickingOnMap": "Seleccionando en el mapa...",
+      "cancelMapSelection": "Cancelar selección del mapa",
       "mapPickHelp": "¿No encuentras el establecimiento? Puedes marcar su ubicación directamente en el mapa.",
       "mapPointSelected": "Ubicación seleccionada en el mapa",
       "manualLocationName": "Nombre del lugar",
