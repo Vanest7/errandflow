@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ErrandFlow.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+946d7161de8e2b7f1b6ed6741edc6fe3d1b9aaa7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0767a43afb1d25456d12a3df56d0f793743f19f2")]
 [assembly: System.Reflection.AssemblyProductAttribute("ErrandFlow.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ErrandFlow.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

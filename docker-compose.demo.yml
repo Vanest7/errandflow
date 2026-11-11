@@ -1,0 +1,72 @@
+name: errandflow-demo
+
+services:
+  database:
+    image: mariadb:11.8.6
+    environment:
+      MARIADB_DATABASE: errandflow
+      MARIADB_USER: errandflow
+      MARIADB_PASSWORD: ${DEMO_DB_PASSWORD:?Run python3 run_demo.py first}
+      MARIADB_ROOT_PASSWORD: ${DEMO_DB_ROOT_PASSWORD:?Run python3 run_demo.py first}
+      TZ: UTC
+    volumes:
+      - database_data:/var/lib/mysql
+      - ./.demo-generated/001_initial.sql:/docker-entrypoint-initdb.d/001_initial.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  certificates:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        if [ ! -s /certs/api.pfx ]; then
+          dotnet dev-certs https --export-path /certs/api.pfx --password "$$CERT_PASSWORD"
+        fi
+        chown 1654:1654 /certs/api.pfx
+        chmod 600 /certs/api.pfx
+    environment:
+      CERT_PASSWORD: ${DEMO_CERT_PASSWORD:?Run python3 run_demo.py first}
+    volumes:
+      - https_certificates:/certs
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: https://+:8443
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /certs/api.pfx
+      ASPNETCORE_Kestrel__Certificates__Default__Password: ${DEMO_CERT_PASSWORD:?Run python3 run_demo.py first}
+      ConnectionStrings__ErrandFlow: Server=database;Port=3306;Database=errandflow;User=errandflow;SslMode=None;
+      Database__Password: ${DEMO_DB_PASSWORD:?Run python3 run_demo.py first}
+      Authentication__Jwt__Authority: https://dev-ufeqgt5qbnghre8j.us.auth0.com/
+      Authentication__Jwt__Audience: https://api.errandflow.local
+    volumes:
+      - https_certificates:/certs:ro
+    depends_on:
+      database:
+        condition: service_healthy
+      certificates:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    ports:
+      - "127.0.0.1:4200:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  database_data:
+  https_certificates:
